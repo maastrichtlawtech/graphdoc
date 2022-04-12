@@ -7,17 +7,15 @@
 <script lang="ts" setup>
 import { onMounted, reactive, Ref, ref } from 'vue'
 
-import { Graph } from "@antv/x6";
-// import "@antv/x6-vue-shape";
+import { Addon, Graph } from "@antv/x6";
+import { Dnd } from '@antv/x6/lib/addon/dnd';
 
 const graph: Ref<Graph | null> = ref(null);
+const dnd: Ref<Dnd | null> = ref(null);
 
-function initModeler() {
-    // https://github.com/eensander/graph-quiz/blob/master/resources/js/components/dashboard/graph/GraphModeler.vue
-
-    const container = document.getElementById("modeler-container");
-    if (container == null)
-        return;
+function initModeler(container: HTMLElement) {
+    // graph-quiz: https://github.com/eensander/graph-quiz/blob/master/resources/js/components/dashboard/graph/GraphModeler.vue
+    // stencil example: https://codesandbox.io/s/m9fzwi
 
     let width = container.scrollWidth;
     let height = container.scrollHeight || 500;
@@ -44,25 +42,48 @@ function initModeler() {
 
 }
 
-function initExampleGraph() {
-    graph.value?.addNode({
+function initExampleNodes() {
+    const path = graph.value?.addNode({
         shape: 'polygon',
-        x: 0,
-        y: 0,
+        x: graph.value.options.width/2,
+        y: graph.value.options.height/2,
         width: 80,
         height: 80,
         points: '26.934,1.318 35.256,18.182 53.867,20.887 40.4,34.013 43.579,52.549 26.934,43.798 10.288,52.549 13.467,34.013 0,20.887 18.611,18.182',
         attrs: {
             body: {
-                stroke: 'none',
+                stroke: 'black',
             },
         },
     })
+
+    console.log("test", graph.value, path)
 }
 
+function initDnd(graph: Graph) {
+    dnd.value = new Addon.Dnd({
+        target: graph,
+        scaled: false,
+    })
+}
+
+
 onMounted(() => {
-    initModeler()
-    initExampleGraph()
+    
+    const container = document.getElementById("modeler-container");
+    if (container != null)
+    {
+        initModeler(container)
+        if (graph.value != null)
+        {
+            initDnd(graph.value)
+            // initExampleNodes()
+        }
+    }
+    else
+    {
+        console.error("Container is null")
+    }
 })
 
 // return {
