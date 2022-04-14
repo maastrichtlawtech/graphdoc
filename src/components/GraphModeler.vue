@@ -1,5 +1,39 @@
 <template>
     <div class="flex justify-center bg-gray-200 py-4">
+        
+        <div class="w-20 bg-red-600">
+            <div v-if="dnd == null" class="bg-gray-300 cursor-wait select-none w-full h-full p-2">
+                <span>Loading...</span>
+            </div>
+            <div v-else>
+                <!--
+                <div class="shape" data-type="start" @mousedown="startDrag($event)">
+                    Start
+                </div>
+                <div class="shape" data-type="decision" @mousedown="startDrag($event)">
+                    Decision
+                </div>
+                <div class="shape" data-type="notice" @mousedown="startDrag($event)">
+                    Notice
+                </div>
+                <div class="shape" data-type="end" @mousedown="startDrag($event)">
+                    End
+                </div>
+                -->
+
+                <div v-for="(element, element_name) of elements" 
+                    :key="element_name" 
+                    class="shape" 
+                    :data-type="element_name"
+                    @mousedown="startDrag($event)">
+                    {{ element_name }}
+                    <svg width="" height="">
+
+                    </svg>
+                </div>
+            </div>
+        </div>
+
         <div class="relative h-full" id="modeler-container"></div>
     </div>
 </template>
@@ -7,11 +41,15 @@
 <script lang="ts" setup>
 import { onMounted, reactive, Ref, ref } from 'vue'
 
-import { Addon, Graph } from "@antv/x6";
+import { Addon, Graph, Node } from "@antv/x6";
 import { Dnd } from '@antv/x6/lib/addon/dnd';
+// import GraphElementsBar from './GraphElementsBar.vue';
 
-const graph: Ref<Graph | null> = ref(null);
+import { elements, graph_options } from './concept_1';
+
+
 const dnd: Ref<Dnd | null> = ref(null);
+const graph: Ref<Graph | null> = ref(null);
 
 function initModeler(container: HTMLElement) {
     // graph-quiz: https://github.com/eensander/graph-quiz/blob/master/resources/js/components/dashboard/graph/GraphModeler.vue
@@ -24,22 +62,8 @@ function initModeler(container: HTMLElement) {
         container,
         width,
         height,
-        grid: true,
-
-        background: {
-            color: 'white'
-        },
-
-        mousewheel: {
-            enabled: true,
-            modifiers: ['ctrl', 'meta'],
-        },
-        scroller: {
-            enabled: true,
-            pannable: true,
-        },
+        ...graph_options
     });
-
 }
 
 function initExampleNodes() {
@@ -60,11 +84,33 @@ function initExampleNodes() {
     console.log("test", graph.value, path)
 }
 
-function initDnd(graph: Graph) {
+function initDnd(graph_arg: Graph) {
+    graph.value = graph_arg;
+
     dnd.value = new Addon.Dnd({
-        target: graph,
+        target: graph.value,
         scaled: false,
     })
+}
+
+function startDrag(e: Event) {
+    if (graph.value == null)
+        return;
+        
+    const target = e.target as HTMLDivElement
+    const type = target.getAttribute('data-type')!
+
+    console.log(e, type, Object.keys(elements));
+    
+    if (!(Object.keys(elements).includes(type))) {
+        throw Error("Element does not exist")
+    }
+
+    const node = graph.value.createNode(elements[type].antv_metadata);
+    // node.label = type
+    
+    console.log(node);
+    dnd.value?.start(node, e);
 }
 
 
@@ -84,11 +130,9 @@ onMounted(() => {
     {
         console.error("Container is null")
     }
+
 })
 
-// return {
-
-// }
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
