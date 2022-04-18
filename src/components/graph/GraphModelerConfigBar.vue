@@ -3,7 +3,7 @@
     <!-- <span>{{ cell }}</span> -->
 
     <div v-if="cell == null">
-        <span class="p-2">No element is selected</span>
+        <span class="block p-2">No element is selected</span>
     </div>
 
     <div v-else-if="cell.isNode()" class="w-full">
@@ -86,7 +86,7 @@
 <script lang="ts" setup>
 
     import { computed, onMounted, ref } from 'vue';
-    import { default_edge_label, node_types, node_type_default } from './graph'
+    import { default_edge_label, node_types, node_type_default } from '../../utils/graph'
 
     import { Cell, Edge } from '@antv/x6'
 
@@ -158,3 +158,11 @@
     }
 
 </script>
+
+<style lang="scss">
+
+input {
+    @apply border border-gray-200;
+}
+
+</style>

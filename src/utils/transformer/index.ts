@@ -1,9 +1,10 @@
-import { Graph } from "@antv/x6";
-import { default_edge_label, node_types } from "./graph";
+import { Cell, Graph } from "@antv/x6";
+import { Base as ShapeBase } from "@antv/x6/lib/shape/base";
+import { default_edge_label, node_types, node_type_default } from "../graph";
 
 export type graphData = {
     nodes: {
-        id: number,
+        id: number | string,
         type: keyof node_types,
         content: string,
         appearance: {
@@ -14,9 +15,9 @@ export type graphData = {
 
     }[],
     edges: {
-        id: number,
-        node_from_id: number,
-        node_to_id: number,
+        id: number | string,
+        node_from_id: number | string,
+        node_to_id: number | string,
         content: string | null,
     }[],
 
@@ -25,6 +26,8 @@ export type graphData = {
         name: string;
     }
 };
+
+export type labledNode = Cell & { label: string, getLabel(): string }
 
 export default class {
     data: graphData | undefined;
@@ -68,26 +71,32 @@ export default class {
 
         console.log("local:", graph);
 
-        for(const loc_node of local_data.nodes) {
-            console.log(loc_node);
+        for(const loc_node of local_data.nodes as ShapeBase[]) {
+            // console.log("loc_node", loc_node);
+            
+            const node_type = loc_node.getData()?.node_type ?? node_type_default;
 
-            /*
-            let rem_node = {
+            const rem_node = {
                 // 'id': loc_node.store.data?.data?.node_id ?? 0,
                 id: loc_node.id,
-                content: loc_node.label ?? '',
-                node_type: loc_node.store.data?.data?.node_type ?? 'default',
+                // content: (loc_node as ShapeBase).getLabel() ?? '',
+                content: loc_node.getLabel() ?? '[no data]',
+                type: node_type,
                 appearance: {
-                    // 'width': loc_node.store.data?.size?.width ?? null,
-                    // 'height': loc_node.store.data?.size?.height ?? null,
-                    x: loc_node.store.data?.position?.x ?? null,
-                    y: loc_node.store.data?.position?.y ?? null,
-                    width: loc_node.store.data?.size?.width ?? null,
-                    height: loc_node.store.data?.size?.height ?? null,
+                    
+                    // x: loc_node.store.data?.position?.x ?? null,
+                    // y: loc_node.store.data?.position?.y ?? null,
+                    // width: loc_node.store.data?.size?.width ?? null,
+                    // height: loc_node.store.data?.size?.height ?? null,
+
+                    x: loc_node.getPosition().x ?? 0,
+                    y: loc_node.getPosition().y ?? 0,
+                    width: loc_node.getSize().width
+                        ?? node_types[node_type as keyof node_types].antv_metadata.width,
+                    height: loc_node.getSize().height 
+                        ?? node_types[node_type as keyof node_types].antv_metadata.height,
                 },
                 options: {
-                    // NEW TODO: check if .getData() returns expected data
-
                     // TODO: from all data.fields, to raw. TODO in deserialize: opposite
                     // ALTERNATIVELY (chosen): in deserialize don't load appearance?
                     // still filter on appearance to prevent collision
@@ -101,34 +110,37 @@ export default class {
                 },
             }
 
-            // console.log(rem_node);
-
             this.data?.nodes.push(rem_node)
-            */
         }
 
+        let alt_id_i = 1;
         for(const loc_edge of local_data['edges']) {
+            console.log("loc_edge", loc_edge);
 
-            // console.log(loc_edge);
-            /*
-            let rem_edge = {
-                'id': loc_edge.store.data?.data?.edge_id ?? 0,
+            let edge_content = loc_edge.getLabelAt(0)?.markup?.toString() ?? null;
+            if (edge_content == "")
+                edge_content = null;
+
+            const rem_edge = {
+                id: loc_edge.getData()?.edge_id ?? alt_id_i++,
+
                 // 'node_from_id': parseInt(loc_edge.store.data?.source?.cell.split('-')[1],10) ?? null,
                     // 'node_to_id': parseInt(loc_edge.store.data?.target?.cell.split('-')[1],10) ?? null,
-                'node_from_id': loc_edge.store.data?.source?.cell,
-                    'node_to_id': loc_edge.store.data?.target?.cell,
-                'content': loc_edge.labels?.[0]?.attrs?.text?.text ?? null,
-                'options': {
-                    'appearance': {
-                        'vertices': loc_edge.store.data?.vertices,
-                    },
+
+                // node_from_id: loc_edge.store.data?.source?.cell,
+                // node_to_id:   loc_edge.store.data?.target?.cell,
+
+                node_from_id: loc_edge.getSourceCellId(),
+                node_to_id:   loc_edge.getTargetCellId(),
+                // content: loc_edge.labels?.[0]?.attrs?.text?.text ?? null,
+                content: edge_content,
+                appearance: {
+                    vertices: loc_edge.getVertices(),
                 },
+                options: {},
             }
 
-            // console.log(rem_edge);
-
             this.data?.edges.push(rem_edge)
-            */
         }
 
         // this.data = serialized;
@@ -139,10 +151,9 @@ export default class {
 
     // inspired from: https://github.com/eensander/graph-quiz/blob/master/resources/js/components/dashboard/graph/GraphModeler.vue#L525
     out_antv() {
-
         if (typeof this.data === "undefined")
         {
-            console.error("No data to encode")
+            console.error("Transformer contains no data to encode")
             return {};
         }
 
@@ -242,8 +253,40 @@ export default class {
         return data;
     }
 
-    out_docassemble() {
+    out_docassemble(): string {
+        if (typeof this.data === "undefined")
+        {
+            console.error("Transformer contains no data to encode")
+            return '';
+        }
 
-        return 'todo';
+        const blocks: Array<string[] | string> = [];
+
+        for (const node in this.data.nodes) {
+            blocks.push(['hey']);
+            console.log("node", node)
+        }
+
+        blocks.push([
+            'mandatory: True',
+            'event: outcome',
+            'question: Uitkomst:',
+            'subquestion: ${ outcome_str }',
+            // 'buttons:',
+            // '  Restart: restart',
+            // 'under',
+        ]);
+
+        // console.log(this.data)
+        const content = blocks.map((block) => {
+            if (typeof block == "string")
+                return block;
+            else if(Array.isArray(block))
+                return block.join("\n");
+        }).join("\n---\n")
+
+        console.log(content);
+
+        return content;
     }
 }

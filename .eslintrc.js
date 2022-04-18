@@ -16,6 +16,8 @@ module.exports = {
     'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
     'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
 
+    'prefer-const': 'warn',
+
     // '@typescript-eslint/ban-ts-comment': 'off',
     // 'vue/script-setup-uses-vars': 'error',
   }

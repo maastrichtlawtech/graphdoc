@@ -9,7 +9,10 @@
                 :local_save="local_save">
             </GraphModelerToolbar> -->
 
-            <!-- <GraphModelerToolbar /> -->
+            <GraphModelerToolbar
+                :graph="graph" 
+                :docassemble_cont_update="docassemble_cont_update"
+                 />
         </div>
         <div class="w-full flex" style="height: 500px;">
             <div class="w-20 bg-gray-100 border-t  border-gray-200">
@@ -23,12 +26,18 @@
             </div>
         </div>
     </div>
+    <div class="mt-4">
+        <span>Docassemble out:</span>
+        <div class="w-full min-h-4 font-mono border p-2 mt-1 whitespace-pre-wrap">
+            {{ docassemble_cont }}
+        </div>
+    </div>
 
 </template>
 
 <script lang="ts" setup>
 
-    import { onMounted, Ref, ref, watch } from 'vue';
+    import { computed, onMounted, Ref, ref, watch } from 'vue';
 
     import { useToast } from "vue-toastification";
 
@@ -39,10 +48,10 @@
     import GraphModelerElementsBar from './GraphModelerElementsBar.vue'
     import GraphModelerToolbar from './GraphModelerToolbar.vue'
 
-    import { default_node_ports } from './graph'
-    import { node_types } from './graph'
+    import { default_node_ports } from '../../utils/graph'
+    import { node_types } from '../../utils/graph'
 
-    import Transformer from './transformer'
+    import Transformer from '../../utils/transformer'
 
     const toast = useToast();
 
@@ -77,6 +86,16 @@
     };
 
 
+    const docassemble_cont: Ref<string> = ref('');
+
+    const docassemble_cont_update = () => {
+        if (typeof graph.value == "undefined")
+            return;
+        
+        console.log("docassemble conv called")
+        docassemble_cont.value = new Transformer().in_antv(graph.value).out_docassemble()
+    };
+    
     const remote_load = (remote_data: any) => {
         graph.value?.fromJSON(new Transformer().in_json(remote_data).out_antv());
     }
@@ -94,6 +113,10 @@
 
         if (typeof graph.value === "undefined")
             return false;
+
+        graph.value.on('cell:change:*', docassemble_cont_update)
+        graph.value.on('cell:removed', docassemble_cont_update)
+        graph.value.on('cell:added', docassemble_cont_update)
 
         graph.value.on('cell:selected', ({ cell, options }) => {
             // console.log(cell)
@@ -195,7 +218,7 @@
                     if (edge != null)
                     {
                         console.log("edge data", e.edge)
-                        
+
                         // const source_node_id = e.edge.getData().source?.cell ?? null;
                         // if (source_node_id != null)
                         //     e.edge.setSource({cell: source_node_id}) // move from output port to node itself, for 'easier' saving

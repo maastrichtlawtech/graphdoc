@@ -1,6 +1,7 @@
 <template>
 
     <div class="shape-holder">
+        <!--         
         <div class="shape" data-type="start" @mousedown="startDrag($event)">
             Start
         </div>
@@ -12,6 +13,16 @@
         </div>
         <div class="shape" data-type="end" @mousedown="startDrag($event)">
             End
+        </div> 
+        -->
+
+        <div v-for="(node_type, node_type_name) of node_types" 
+            :key="node_type_name" 
+            class="shape cursor-move p-2 bg-blue-200 border-b border-gray-400 my-1" 
+            :data-type="node_type_name"
+            @mousedown="startDrag($event)">
+            {{ node_type_name }}
+            
         </div>
     </div>
 
@@ -20,11 +31,11 @@
 <script lang="ts" setup>
     // https://github.com/antvis/X6/blob/master/sites/x6-sites-demos/packages/tutorial/basic/dnd/dnd/src/app.tsx
 
-    import { Dom, Addon, Graph } from '@antv/x6';
+    import { Dom, Addon, Graph, Node } from '@antv/x6';
     import { Dnd } from '@antv/x6/lib/addon/dnd';
     
     import { onMounted, Ref, ref, watch, computed } from 'vue';
-    import { graph_options, node_types } from './graph';
+    import { graph_options, node_types } from '../../utils/graph';
 
     const props = defineProps<{
         graph: Graph | undefined,
@@ -48,6 +59,8 @@
     watch(() => props.graph, (value: typeof props.graph) => {
         if (typeof value !== "undefined")
             init_dnd(value)
+
+        // console.log("node-create", Node.create(node_types["notice"]))
     })
 
     const init_dnd = (graph: Graph) => {
