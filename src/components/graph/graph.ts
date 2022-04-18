@@ -1,6 +1,47 @@
 
-import { Node } from '@antv/x6';
+import { Graph, Node } from '@antv/x6';
 
+export const default_edge_label = (text: string | null = '') => {
+    if (text == null)
+        return null;
+
+    return {
+        attrs: {
+            text: {
+                text: text,
+            }
+        },
+        position: {
+            distance: .25,
+        },
+    }
+}
+
+export const graph_options = {
+    grid: true,
+
+    background: {
+        color: 'white'
+    },
+
+    // mousewheel: {
+    //     enabled: true,
+    //     modifiers: ['ctrl', 'meta'],
+    // },
+
+    mousewheel: {
+        enabled: true,
+        zoomAtMousePosition: true,
+        modifiers: 'ctrl',
+        minScale: 0.5,
+        maxScale: 3,
+    },
+
+    scroller: {
+        enabled: true,
+        pannable: true,
+    },
+}
 
 export const default_node_ports = {
     groups: {
@@ -22,24 +63,20 @@ export const default_node_ports = {
     ]
 };
 
-export const graph_options = {
-    grid: true,
+export type node_types = {
+    [
+        key in "start" | "notice" | "decision" | "end"
+    ]: {
+        antv_metadata: Node.Metadata,
+        config_fields: {
+            general?: string[],
+            additional?: string[]
+        }
+    }
+};
+export const node_type_default = 'notice';
 
-    background: {
-        color: 'white'
-    },
-
-    mousewheel: {
-        enabled: true,
-        modifiers: ['ctrl', 'meta'],
-    },
-    scroller: {
-        enabled: true,
-        pannable: true,
-    },
-}
-
-export const elements: {[key: string]: {antv_metadata: Node.Metadata}} = {
+export const node_types: node_types = {
     // https://github.com/eensander/graph-quiz/blob/master/resources/js/components/dashboard/graph/GraphModeler.vue#L112
     start: {
         antv_metadata: {
@@ -63,6 +100,15 @@ export const elements: {[key: string]: {antv_metadata: Node.Metadata}} = {
                 node_type: 'start',
                 options: {}
             },
+            ports: default_node_ports,
+        },
+        config_fields: {
+            general: [
+                'label'
+            ],
+            additional: [
+                'annotation'
+            ],
         }
     },
     decision: {
@@ -90,6 +136,15 @@ export const elements: {[key: string]: {antv_metadata: Node.Metadata}} = {
                 options: {}
             },
             ports: default_node_ports,
+        },
+        config_fields: {
+            general: [
+                'label'
+            ],
+            additional: [
+                'annotation',
+                'subgraph'
+            ],
         }
     },
     notice: {
@@ -115,6 +170,14 @@ export const elements: {[key: string]: {antv_metadata: Node.Metadata}} = {
                 options: {}
             },
             ports: default_node_ports,
+        },
+        config_fields: {
+            general: [
+                'label'
+            ],
+            additional: [
+                'annotation'
+            ],
         }
     },
     end: {
@@ -139,7 +202,12 @@ export const elements: {[key: string]: {antv_metadata: Node.Metadata}} = {
                 node_type: 'end',
                 options: {}
             },
-            ports: default_node_ports,
+            // ports: default_node_ports,
+        },
+        config_fields: {
+            general: [
+                'label'
+            ],
         }
     }
 }

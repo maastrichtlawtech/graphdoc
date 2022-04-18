@@ -1,7 +1,7 @@
 <template>
     <div class="flex justify-center bg-gray-200 py-4">
         
-        <div class="w-20 bg-red-600">
+        <div class="w-20 bg-white border-r border-gray-300">
             <div v-if="dnd == null" class="bg-gray-300 cursor-wait select-none w-full h-full p-2">
                 <span>Loading...</span>
             </div>
@@ -23,18 +23,18 @@
 
                 <div v-for="(element, element_name) of elements" 
                     :key="element_name" 
-                    class="shape" 
+                    class="shape cursor-move p-2 bg-blue-200 border-b border-gray-400 my-1" 
                     :data-type="element_name"
                     @mousedown="startDrag($event)">
                     {{ element_name }}
-                    <svg width="" height="">
 
-                    </svg>
+                    <!-- <svg width="" height="">
+                    </svg> -->
                 </div>
             </div>
         </div>
 
-        <div class="relative h-full" id="modeler-container"></div>
+        <div  class="relative h-full" id="modeler-container"></div>
     </div>
 </template>
 
@@ -107,7 +107,7 @@ function startDrag(e: Event) {
     }
 
     const node = graph.value.createNode(elements[type].antv_metadata);
-    // node.label = type
+    node.label = type
     
     console.log(node);
     dnd.value?.start(node, e);

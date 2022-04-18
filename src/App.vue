@@ -1,19 +1,13 @@
 <template>
     <div class="">
-        <GraphModeler />
+        <GraphEditorComponent />
     </div>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { defineComponent } from 'vue';
-import GraphModeler from './components/GraphModeler.vue';
-
-export default defineComponent({
-    name: 'App',
-    components: {
-        GraphModeler
-    }
-});
+// import GraphModeler from './components/GraphModeler.vue';
+import GraphEditorComponent from './components/graph/GraphEditorComponent.vue';
 </script>
 
 <style lang="scss">
