@@ -27,7 +27,7 @@ export type graphData = {
     }
 };
 
-export type labledNode = Cell & { label: string, getLabel(): string }
+// export type labledNode = Cell & { label: string, getLabel(): string }
 
 export default class {
     data: graphData | undefined;
@@ -253,6 +253,43 @@ export default class {
         return data;
     }
 
+    out_docassemble2(): string {
+        if (typeof this.data === "undefined")
+        {
+            console.error("Transformer contains no data to encode")
+            return '';
+        }
+
+        const blocks: Array<string[] | string> = [];
+
+        for (const node in this.data.nodes) {
+            blocks.push(['hey']);
+            console.log("node", node)
+        }
+
+        blocks.push([
+            'mandatory: True',
+            'event: outcome',
+            'question: Uitkomst:',
+            'subquestion: ${ outcome_str }',
+            // 'buttons:',
+            // '  Restart: restart',
+            // 'under',
+        ]);
+
+        // console.log(this.data)
+        const content = blocks.map((block) => {
+            if (typeof block == "string")
+                return block;
+            else if(Array.isArray(block))
+                return block.join("\n");
+        }).join("\n---\n")
+
+        console.log(content);
+
+        return content;
+    }
+
     out_docassemble(): string {
         if (typeof this.data === "undefined")
         {
@@ -289,4 +326,5 @@ export default class {
 
         return content;
     }
+
 }
