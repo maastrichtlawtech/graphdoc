@@ -2,24 +2,28 @@ import { Cell, Graph } from "@antv/x6";
 import { Base as ShapeBase } from "@antv/x6/lib/shape/base";
 import { default_edge_label, node_types, node_type_default } from "../graph";
 
-export type graphData = {
-    nodes: {
-        id: number | string,
-        type: keyof node_types,
-        content: string,
-        appearance: {
-            x: number, y: number,
-            width: number, height: number,
-        },
-        options: {[key: string]: any},
+export type Node = {
+    id: number | string,
+    type: keyof node_types,
+    content: string,
+    appearance: {
+        x: number, y: number,
+        width: number, height: number,
+    },
+    options: {[key: string]: any},
 
-    }[],
-    edges: {
-        id: number | string,
-        node_from_id: number | string,
-        node_to_id: number | string,
-        content: string | null,
-    }[],
+}
+
+export type Edge = {
+    id: number | string,
+    node_from_id: number | string,
+    node_to_id: number | string,
+    content: string | null,
+}
+
+export type graphData = {
+    nodes: Node[],
+    edges: Edge[],
 
     graph: {
         // id: number,
@@ -41,6 +45,24 @@ export default class {
                 name
             }
         }
+    }
+
+    get_nodes_by_type(type: keyof node_types) {
+        return this.data?.nodes.filter(x => x.type == type);
+    }
+
+    node_get_nodes_in(node_id: string | number) {
+        const node_ids = this.data?.edges
+            .filter(edge => edge.node_to_id == node_id)
+            .map(edge => edge.node_from_id) ?? [];
+        return this.data?.nodes.filter(node => node_ids.includes(node.id));
+    }
+
+    node_get_nodes_out(node_id: string | number) {
+        const node_ids = this.data?.edges
+            .filter(edge => edge.node_from_id == node_id)
+            .map(edge => edge.node_to_id) ?? [];
+        return this.data?.nodes.filter(node => node_ids.includes(node.id));
     }
 
     in_json(data: graphData) {
@@ -69,7 +91,7 @@ export default class {
             'edges': graph.getEdges(),
         };
 
-        console.log("local:", graph);
+        // console.log("local:", graph);
 
         for(const loc_node of local_data.nodes as ShapeBase[]) {
             // console.log("loc_node", loc_node);
@@ -115,9 +137,9 @@ export default class {
 
         let alt_id_i = 1;
         for(const loc_edge of local_data['edges']) {
-            console.log("loc_edge", loc_edge);
+            // console.log("loc_edge", loc_edge);
 
-            let edge_content = loc_edge.getLabelAt(0)?.markup?.toString() ?? null;
+            let edge_content = loc_edge.getLabelAt(0)?.attrs?.text?.text?.toString() ?? null;
             if (edge_content == "")
                 edge_content = null;
 
@@ -290,39 +312,210 @@ export default class {
         return content;
     }
 
+    da_node_get_id(node: Node): string {
+        return `${ node.type }_${ node.id.toString().replace('-', '_') }`
+    }
+
+    da_build_logic32(node: Node, indent = 0): string[] {
+        // const node_children = this.node_get_nodes_out(node.id)!
+        console.log("da_build_logic", node.content)
+
+        const node_edges_out = this.data?.edges
+            .filter(edge => edge.node_from_id == node.id) ?? []
+        
+        let code = [];
+
+        for(const node_edge_out of node_edges_out) {
+            console.log("node_edge_out", node_edge_out)
+            const node_out = this.data?.nodes.find(n => n.id == node_edge_out.node_to_id);
+            if (typeof node_out === "undefined")
+                continue;
+
+            let sub_indent = indent;
+
+            switch(node_out.type) {
+                case 'start':
+                    break
+                case 'end':
+                    code.push(`return ${ this.da_node_get_id(node_out) }`);
+
+                    break
+                case 'decision': {
+                    code.push(`if ${ this.da_node_get_id(node_out) } == '${ node_edge_out.content }':`);
+                    sub_indent++
+                    
+                    break
+                }
+                case 'notice': {
+                    code.push(`${ this.da_node_get_id(node_out) }`);
+                    
+                    break
+                }
+            }
+
+            code.push(...this.da_build_logic(node_out, sub_indent))
+
+        }
+
+        // add indent
+        code = code.map(line => ' '.repeat(indent*2).concat(line))
+
+        return code
+    }
+
+    da_build_logic(node: Node, indent = 0): string[] {
+        // const node_children = this.node_get_nodes_out(node.id)!
+        console.log("da_build_logic", node.content, indent)
+
+        const node_edges_out: Array<Edge & {node_to: Node}>  = this.data?.edges
+            .filter(edge => edge.node_from_id == node.id)
+            
+            // .map(edge => ({...edge, node_to: this.data?.nodes.find(n => n.id == edge.node_to_id) ?? null}))
+            // .filter(edge => edge.node_to != null) ?? []
+
+            // flatMap: https://stackoverflow.com/a/59726888/17864167
+            // add member: https://stackoverflow.com/a/44407980/17864167
+            .flatMap(edge => {
+                const node_to = this.data?.nodes.find(n => n.id == edge.node_to_id) ?? null;
+                return node_to ? [{...edge, node_to }] : []
+            }) ?? []
+        
+        console.log(node_edges_out)
+
+        let code = [];
+
+        switch(node.type) {
+            case 'start':
+
+                code.push('get_outcome():')
+                for(const node_edge_out of node_edges_out) 
+                    code.push(...this.da_build_logic(node_edge_out.node_to, 1));
+
+                break
+            case 'end':
+                code.push(`return ${ this.da_node_get_id(node) }`);
+
+                break
+            case 'decision': {
+
+                for(const node_edge_out of node_edges_out) {
+                    console.log("node_edge_out", node_edge_out)
+                    const node_out = this.data?.nodes.find(n => n.id == node_edge_out.node_to_id);
+                    if (typeof node_out === "undefined")
+                        continue;
+                    
+                    code.push(`if ${ this.da_node_get_id(node) } == '${ node_edge_out.content }':`);
+                    code.push(...this.da_build_logic(node_out, 1))
+                }
+                
+                break
+            }
+            case 'notice': {
+                code.push(`${ this.da_node_get_id(node) }`);
+
+                for(const node_edge_out of node_edges_out) 
+                    code.push(...this.da_build_logic(node_edge_out.node_to, 0));
+
+                
+                break
+            }
+        }
+
+        // add indent
+        code = code.map(line => ' '.repeat(indent*2).concat(line))
+
+        return code
+    }
+
     out_docassemble(): string {
         if (typeof this.data === "undefined")
-        {
-            console.error("Transformer contains no data to encode")
-            return '';
-        }
+            throw Error("Transformer contains no data to encode")
+
+        const node_start = this.get_nodes_by_type('start')![0]!;
+        // if (typeof node_start === "undefined")
+        //     throw Error("Graph is missing start node")
+        const nodes_end = this.get_nodes_by_type('end');
+        // if (nodes_end?.length === 0)
+        //     throw Error("Graph is missing atleast one end node")
 
         const blocks: Array<string[] | string> = [];
+        
+        blocks.push([
+            'question: Start',
+            `subquestion: ${ node_start.content }`,
+        ]);
 
-        for (const node in this.data.nodes) {
-            blocks.push(['hey']);
-            console.log("node", node)
+        let next_nodes = this.node_get_nodes_out(node_start.id) ?? []
+
+        // const traverse = (node: graphData['nodes'][number]) => {
+        //     for (const next_node of this.node_get_nodes_out(node.id)!) {
+        //         traverse(next_node)
+        //         return next_node
+        //     }
+        // }
+
+        
+        for (const node of this.data.nodes) {
+
+            switch(node.type) {
+                case 'start':
+                    break
+                case 'end':
+                    break
+                case 'decision': {
+                    
+                    const edges_out = this.data?.edges
+                        .filter(edge => edge.node_from_id == node.id);
+                    
+                    const buttons: Array<string> = [];
+
+                    for (const edge_out of edges_out) {
+                        // console.log("edge_out", edge_out)
+                        if (edge_out.content != null)
+                            buttons.push(`  "${ edge_out.content }"`)
+                    }
+
+                    blocks.push([
+                        'mandatory: True',
+                        'question: Question',
+                        `subquestion: ${ node.content }`,
+                        `field: ${ this.da_node_get_id(node) }`,
+                        'buttons:',
+                        ...buttons
+                    ]);
+                    break
+                }
+                case 'notice': {
+                    blocks.push([
+                        'mandatory: True',
+                        'question: Notice',
+                        `subquestion: ${ node.content }`,
+                        `continue button field: ${ this.da_node_get_id(node) }`,
+                    ]);
+                    break
+                }
+            }
         }
+
+        const logic_block = ['code: |'];
+        // for(const )
 
         blocks.push([
             'mandatory: True',
-            'event: outcome',
-            'question: Uitkomst:',
-            'subquestion: ${ outcome_str }',
-            // 'buttons:',
-            // '  Restart: restart',
-            // 'under',
+            'question: End',
+            'subquestion: ${outcome}'
         ]);
 
         // console.log(this.data)
-        const content = blocks.map((block) => {
+        let content = blocks.map((block) => {
             if (typeof block == "string")
                 return block;
             else if(Array.isArray(block))
                 return block.join("\n");
         }).join("\n---\n")
 
-        console.log(content);
+        content = this.da_build_logic(node_start).join('\n')
+        console.log("content", content);
 
         return content;
     }

@@ -155,6 +155,10 @@
             (props.cell as Edge).removeLabelAt(0);
             (props.cell as Edge).setLabelAt(0, edge_label);
         }
+
+        (props.cell as Edge).setData({content})
+
+        // console.log("CELL DATA", props.cell)
     }
 
 </script>
