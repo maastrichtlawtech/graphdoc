@@ -31,6 +31,10 @@ export type graphData = {
     }
 };
 
+function indent(lines: string[], indent = 1, spaces_per = 2): string[] {
+    return lines.map(line => ' '.repeat(indent*2).concat(line))
+}
+
 // export type labledNode = Cell & { label: string, getLabel(): string }
 
 export default class {
@@ -90,9 +94,7 @@ export default class {
             'nodes': graph.getNodes(),
             'edges': graph.getEdges(),
         };
-
-        // console.log("local:", graph);
-
+        
         for(const loc_node of local_data.nodes as ShapeBase[]) {
             // console.log("loc_node", loc_node);
             
@@ -294,9 +296,6 @@ export default class {
             'event: outcome',
             'question: Uitkomst:',
             'subquestion: ${ outcome_str }',
-            // 'buttons:',
-            // '  Restart: restart',
-            // 'under',
         ]);
 
         // console.log(this.data)
@@ -313,65 +312,21 @@ export default class {
     }
 
     da_node_get_id(node: Node): string {
-        return `${ node.type }_${ node.id.toString().replace('-', '_') }`
+        return `${ node.type }_${ node.id.toString().split('-')[0] }`
     }
 
-    da_build_logic32(node: Node, indent = 0): string[] {
+    /**
+     * Construct logic in code block for docassemble
+     * @param node The root node to start traversal from
+     * @param indent To indent this code relative to indent of current node
+     * @returns string[] lines of code
+     */
+    da_build_logic(node: Node, indent_i = 0): string[] {
         // const node_children = this.node_get_nodes_out(node.id)!
-        console.log("da_build_logic", node.content)
-
-        const node_edges_out = this.data?.edges
-            .filter(edge => edge.node_from_id == node.id) ?? []
-        
-        let code = [];
-
-        for(const node_edge_out of node_edges_out) {
-            console.log("node_edge_out", node_edge_out)
-            const node_out = this.data?.nodes.find(n => n.id == node_edge_out.node_to_id);
-            if (typeof node_out === "undefined")
-                continue;
-
-            let sub_indent = indent;
-
-            switch(node_out.type) {
-                case 'start':
-                    break
-                case 'end':
-                    code.push(`return ${ this.da_node_get_id(node_out) }`);
-
-                    break
-                case 'decision': {
-                    code.push(`if ${ this.da_node_get_id(node_out) } == '${ node_edge_out.content }':`);
-                    sub_indent++
-                    
-                    break
-                }
-                case 'notice': {
-                    code.push(`${ this.da_node_get_id(node_out) }`);
-                    
-                    break
-                }
-            }
-
-            code.push(...this.da_build_logic(node_out, sub_indent))
-
-        }
-
-        // add indent
-        code = code.map(line => ' '.repeat(indent*2).concat(line))
-
-        return code
-    }
-
-    da_build_logic(node: Node, indent = 0): string[] {
-        // const node_children = this.node_get_nodes_out(node.id)!
-        console.log("da_build_logic", node.content, indent)
+        // console.log("da_build_logic", node.content, indent)
 
         const node_edges_out: Array<Edge & {node_to: Node}>  = this.data?.edges
             .filter(edge => edge.node_from_id == node.id)
-            
-            // .map(edge => ({...edge, node_to: this.data?.nodes.find(n => n.id == edge.node_to_id) ?? null}))
-            // .filter(edge => edge.node_to != null) ?? []
 
             // flatMap: https://stackoverflow.com/a/59726888/17864167
             // add member: https://stackoverflow.com/a/44407980/17864167
@@ -380,32 +335,38 @@ export default class {
                 return node_to ? [{...edge, node_to }] : []
             }) ?? []
         
-        console.log(node_edges_out)
-
-        let code = [];
+        let code: string[] = [];
 
         switch(node.type) {
-            case 'start':
+            case 'start': {
 
-                code.push('get_outcome():')
-                for(const node_edge_out of node_edges_out) 
-                    code.push(...this.da_build_logic(node_edge_out.node_to, 1));
+                code.push(`def get_outcome_${ this.da_node_get_id(node) }():`)
+                
+                const sub_cont: string[] = []
+                for(const node_edge_out of node_edges_out)
+                    sub_cont.push(...this.da_build_logic(node_edge_out.node_to, 1))
+                
+                if (sub_cont.length > 0)
+                    code.push(...indent(sub_cont))
+                else
+                    code.push(...indent(['pass']));
+                
+                code.push(`outcome = get_outcome_${ this.da_node_get_id(node) }()`)
 
                 break
+
+            }
             case 'end':
                 code.push(`return ${ this.da_node_get_id(node) }`);
 
                 break
             case 'decision': {
 
-                for(const node_edge_out of node_edges_out) {
-                    console.log("node_edge_out", node_edge_out)
-                    const node_out = this.data?.nodes.find(n => n.id == node_edge_out.node_to_id);
-                    if (typeof node_out === "undefined")
-                        continue;
-                    
+                for(const node_edge_out of node_edges_out) {                    
+                    const sub_node = this.da_build_logic(node_edge_out.node_to, 1)
+
                     code.push(`if ${ this.da_node_get_id(node) } == '${ node_edge_out.content }':`);
-                    code.push(...this.da_build_logic(node_out, 1))
+                    code.push(...indent(sub_node || ['pass'], 1))
                 }
                 
                 break
@@ -421,21 +382,21 @@ export default class {
             }
         }
 
-        // add indent
-        code = code.map(line => ' '.repeat(indent*2).concat(line))
-
         return code
     }
 
     out_docassemble(): string {
         if (typeof this.data === "undefined")
-            throw Error("Transformer contains no data to encode")
+            return 'contains errors';
+            // throw Error("Transformer contains no data to encode")
 
         const node_start = this.get_nodes_by_type('start')![0]!;
-        // if (typeof node_start === "undefined")
+        if (typeof node_start === "undefined")
+            return 'no start node'
         //     throw Error("Graph is missing start node")
         const nodes_end = this.get_nodes_by_type('end');
-        // if (nodes_end?.length === 0)
+        if (nodes_end?.length === 0)
+            return 'no end node(s)'
         //     throw Error("Graph is missing atleast one end node")
 
         const blocks: Array<string[] | string> = [];
@@ -467,27 +428,26 @@ export default class {
                     const edges_out = this.data?.edges
                         .filter(edge => edge.node_from_id == node.id);
                     
-                    const buttons: Array<string> = [];
+                    let buttons: Array<string> = [];
 
                     for (const edge_out of edges_out) {
-                        // console.log("edge_out", edge_out)
                         if (edge_out.content != null)
-                            buttons.push(`  "${ edge_out.content }"`)
+                            buttons.push(`  - "${ edge_out.content }"`)
                     }
 
+                    if (buttons.length > 0)
+                        buttons = ['buttons:', ...buttons]
+
                     blocks.push([
-                        'mandatory: True',
                         'question: Question',
                         `subquestion: ${ node.content }`,
                         `field: ${ this.da_node_get_id(node) }`,
-                        'buttons:',
                         ...buttons
                     ]);
                     break
                 }
                 case 'notice': {
                     blocks.push([
-                        'mandatory: True',
                         'question: Notice',
                         `subquestion: ${ node.content }`,
                         `continue button field: ${ this.da_node_get_id(node) }`,
@@ -496,8 +456,17 @@ export default class {
                 }
             }
         }
+        
+        const logic_code: string[] = [];
+        for (const node_end of nodes_end ?? [])
+            // adding declarations to end node
+            logic_code.push(...indent([`${this.da_node_get_id(node_end)} = '${node_end.content}'`]))
 
-        const logic_block = ['code: |'];
+        logic_code.push(...indent(this.da_build_logic(node_start)));
+
+        if (logic_code.length > 0)
+            blocks.push(['code: |', ...logic_code])
+        
         // for(const )
 
         blocks.push([
@@ -505,8 +474,7 @@ export default class {
             'question: End',
             'subquestion: ${outcome}'
         ]);
-
-        // console.log(this.data)
+        
         let content = blocks.map((block) => {
             if (typeof block == "string")
                 return block;
@@ -514,9 +482,8 @@ export default class {
                 return block.join("\n");
         }).join("\n---\n")
 
-        content = this.da_build_logic(node_start).join('\n')
-        console.log("content", content);
-
+        // content = 
+        
         return content;
     }
 
