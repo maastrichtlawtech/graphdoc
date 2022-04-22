@@ -1,6 +1,7 @@
-import { Cell, Graph } from "@antv/x6";
+import { Cell, Graph as AntvGraph } from "@antv/x6";
 import { Base as ShapeBase } from "@antv/x6/lib/shape/base";
-import { default_edge_label, node_types, node_type_default } from "../graph";
+import { default as Graph, } from "../graph";
+import { default_edge_label, node_types, node_type_default } from "../model";
 
 export type Node = {
     id: number | string,
@@ -26,7 +27,6 @@ export type graphData = {
     edges: Edge[],
 
     graph: {
-        // id: number,
         name: string;
     }
 };
@@ -38,50 +38,33 @@ function indent(lines: string[], indent = 1, spaces_per = 2): string[] {
 // export type labledNode = Cell & { label: string, getLabel(): string }
 
 export default class {
-    data: graphData | undefined;
-
-    init_data(name = "Untitled graph") {
-        this.data = {
-            nodes: [],
-            edges: [],
-            graph: {
-                // id: 1,
-                name
-            }
-        }
+    graph: Graph;
+    
+    constructor(graph: Graph | null) {
+        this.graph = graph ?? new Graph();
     }
 
-    get_nodes_by_type(type: keyof node_types) {
-        return this.data?.nodes.filter(x => x.type == type);
-    }
+    in_json(data: Object) {
+        // const data = JSON.parse(data_json)
 
-    node_get_nodes_in(node_id: string | number) {
-        const node_ids = this.data?.edges
-            .filter(edge => edge.node_to_id == node_id)
-            .map(edge => edge.node_from_id) ?? [];
-        return this.data?.nodes.filter(node => node_ids.includes(node.id));
-    }
+        // this.data = data;
+        this.graph.clear();
 
-    node_get_nodes_out(node_id: string | number) {
-        const node_ids = this.data?.edges
-            .filter(edge => edge.node_from_id == node_id)
-            .map(edge => edge.node_to_id) ?? [];
-        return this.data?.nodes.filter(node => node_ids.includes(node.id));
-    }
-
-    in_json(data: graphData) {
-        this.data = data;
+        this.graph.name = data.
 
         return this;
     }
     out_json() {
-        if (typeof this.data === "undefined")
-        {
-            console.error("No data to encode")
-            return {};
+        
+        const data = {
+            'nodes': this.graph.nodes,
+            'edges': this.graph.edges,
+            'graph': {
+                'name': this.graph.name
+            }
         }
 
-        return this.data;
+        return data;
     }
 
 
@@ -376,7 +359,6 @@ export default class {
 
                 for(const node_edge_out of node_edges_out) 
                     code.push(...this.da_build_logic(node_edge_out.node_to, 0));
-
                 
                 break
             }
@@ -405,16 +387,6 @@ export default class {
             'question: Start',
             `subquestion: ${ node_start.content }`,
         ]);
-
-        let next_nodes = this.node_get_nodes_out(node_start.id) ?? []
-
-        // const traverse = (node: graphData['nodes'][number]) => {
-        //     for (const next_node of this.node_get_nodes_out(node.id)!) {
-        //         traverse(next_node)
-        //         return next_node
-        //     }
-        // }
-
         
         for (const node of this.data.nodes) {
 
@@ -459,15 +431,13 @@ export default class {
         
         const logic_code: string[] = [];
         for (const node_end of nodes_end ?? [])
-            // adding declarations to end node
+            // adding declarations to end nodes content
             logic_code.push(...indent([`${this.da_node_get_id(node_end)} = '${node_end.content}'`]))
 
         logic_code.push(...indent(this.da_build_logic(node_start)));
 
         if (logic_code.length > 0)
             blocks.push(['code: |', ...logic_code])
-        
-        // for(const )
 
         blocks.push([
             'mandatory: True',
@@ -481,8 +451,6 @@ export default class {
             else if(Array.isArray(block))
                 return block.join("\n");
         }).join("\n---\n")
-
-        // content = 
         
         return content;
     }
