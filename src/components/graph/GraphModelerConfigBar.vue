@@ -142,7 +142,9 @@
     const edge_get_label = () => {
         // return this.cell.store?.data?.labels?.[0] ?? '';
         
-        return props.cell?.getData()?.labels?.[0].attrs.text.text ?? '';
+        // console.log(props.cell);
+        return (props.cell as Edge).getLabelAt(0)?.attrs?.text?.text ?? '';
+        // return props.cell?.getData()?.labels?.[0].attrs.text.text ?? '';
         
         // return (props.cell as any).getLabels()[0] ?? ''
     };

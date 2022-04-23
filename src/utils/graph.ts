@@ -52,16 +52,16 @@ export class Node {
             .filter(edge => edge.node_to_id == this.id)
     }
 
+    get_edges_out() {
+        return this.graph.edges
+            .filter(edge => edge.node_from_id == this.id)
+    }
+
     get_nodes_in() {
         const node_ids = this.get_edges_in()
             .map(edge => edge.node_from_id) ?? []; // only return node_ids
         return this.graph.nodes
             .filter(node => node_ids.includes(node.id));
-    }
-
-    get_edges_out() {
-        return this.graph.edges
-            .filter(edge => edge.node_from_id == this.id)
     }
 
     get_nodes_out() {
@@ -111,14 +111,14 @@ export class Edge {
         this.content = content;
     }
 */
-    node_from() {
+    get_node_from() {
         return this.graph.nodes
-            .filter(node => node.id == this.node_from_id)
+            .filter(node => node.id == this.node_from_id)[0]
     }
 
-    node_to() {
+    get_node_to() {
         return this.graph.nodes
-            .filter(node => node.id == this.node_to_id)
+            .filter(node => node.id == this.node_to_id)[0]
     }
 
 }

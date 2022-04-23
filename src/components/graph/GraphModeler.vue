@@ -92,11 +92,11 @@
             return;
         
         console.log("docassemble conv called")
-        docassemble_cont.value = new Transformer().in_antv(graph.value).out_docassemble()
+        docassemble_cont.value = (new Transformer()).in_antv(graph.value).out_docassemble();
     };
     
     const remote_load = (remote_data: any) => {
-        graph.value?.fromJSON(new Transformer().in_json(remote_data).out_antv());
+        graph.value?.fromJSON((new Transformer()).in_json(remote_data).out_antv());
     }
 
     const local_save = () => {
