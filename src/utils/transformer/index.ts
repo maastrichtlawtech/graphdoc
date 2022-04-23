@@ -1,9 +1,5 @@
-import { Cell, Graph as AntvGraph } from "@antv/x6";
-import { Base as ShapeBase } from "@antv/x6/lib/shape/base";
+import { Graph as AntvGraph } from "@antv/x6";
 import { default as Graph, } from "../graph";
-import { default_edge_label, node_types, node_type_default } from "../model";
-import * as _ from 'lodash';
-import { pick } from "../data/pick";
 import { DocassembleTransformer } from "./docassemble";
 import { AntvisTransformer } from "./antvis";
 import { JSONTransformer } from "./json";

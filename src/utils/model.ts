@@ -1,5 +1,5 @@
 
-import { Graph, Node } from '@antv/x6';
+import { Node } from '@antv/x6';
 
 export const default_edge_label = (text: string | null = '') => {
     if (text == null)

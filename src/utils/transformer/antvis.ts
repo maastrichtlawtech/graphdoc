@@ -55,7 +55,7 @@ export class AntvisTransformer {
 
         let alt_id_i = 1;
         for(const loc_edge of local_data['edges']) {
-            console.log("loc_edge", loc_edge);
+            // console.log("loc_edge", loc_edge);
 
             // both source and target ought to be known (non null)
             if (loc_edge.getSourceCell() == null || loc_edge.getTargetCell() == null)

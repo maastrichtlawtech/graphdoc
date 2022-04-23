@@ -91,8 +91,9 @@
         if (typeof graph.value == "undefined")
             return;
         
-        console.log("docassemble conv called")
+        // console.log("docassemble conv called")
         docassemble_cont.value = (new Transformer()).in_antv(graph.value).out_docassemble();
+        // docassemble_cont.value = JSON.stringify((new Transformer()).in_antv(graph.value).out_json());
     };
     
     const remote_load = (remote_data: any) => {

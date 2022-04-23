@@ -1,8 +1,20 @@
 import { ITransformer } from ".";
-import Graph, { Edge, Node } from "../graph";
+import Graph, { Node } from "../graph";
 import { indent } from "@/utils/data/indent"
 
 export class DocassembleTransformer implements ITransformer  {
+
+    /*
+    validate_graph(graph: Graph) {
+        const node_start = graph.get_nodes_by_type('start')[0];
+        if (typeof node_start === "undefined")
+            return 'no start node'
+        //     throw Error("Graph is missing start node")
+        const nodes_end = graph.get_nodes_by_type('end');
+        if (nodes_end?.length === 0)
+            return 'no end node(s)'
+    }
+    */
     
     da_node_get_id(node: Node): string {
         return `${ node.type }_${ node.id.toString().split('-')[0] }`
@@ -14,25 +26,11 @@ export class DocassembleTransformer implements ITransformer  {
      * @param indent To indent this code relative to indent of current node
      * @returns string[] lines of code
      */
-    da_build_logic(graph: Graph, node: Node, indent_i = 0): string[] {
-        // const node_children = this.node_get_nodes_out(node.id)!
-        // console.log("da_build_logic", node.content, indent)
-
-        /*
-        const node_edges_out: Array<Edge & {node_to: Node}>  = graph.edges
-            .filter(edge => edge.node_from_id == node.id)
-
-            // flatMap: https://stackoverflow.com/a/59726888/17864167
-            // add member: https://stackoverflow.com/a/44407980/17864167
-            .flatMap(edge => {
-                const node_to = graph.nodes.find(n => n.id == edge.node_to_id) ?? null;
-                return node_to ? [{...edge, node_to }] : []
-            }) ?? []
-        */
+    da_build_logic(graph: Graph, node: Node): string[] {
 
         const node_edges_out = node.get_edges_out();
         
-        let code: string[] = [];
+        const code: string[] = [];
 
         switch(node.type) {
             case 'start': {
@@ -42,7 +40,7 @@ export class DocassembleTransformer implements ITransformer  {
                 
                 const sub_cont: string[] = []
                 for(const node_edge_out of node_edges_out)
-                    sub_cont.push(...this.da_build_logic(graph, node_edge_out.get_node_to(), 1))
+                    sub_cont.push(...this.da_build_logic(graph, node_edge_out.get_node_to()))
                 
                 if (sub_cont.length > 0)
                     code.push(...indent(sub_cont))
@@ -65,7 +63,7 @@ export class DocassembleTransformer implements ITransformer  {
                     if (node_edge_out_content == null)
                         continue
 
-                    const sub_node = this.da_build_logic(graph, node_edge_out.get_node_to(), 1)
+                    const sub_node = this.da_build_logic(graph, node_edge_out.get_node_to())
 
                     code.push(`if ${ this.da_node_get_id(node) } == '${ node_edge_out.content }':`);
                     code.push(...indent(sub_node || ['pass'], 1))
@@ -77,7 +75,7 @@ export class DocassembleTransformer implements ITransformer  {
                 code.push(`${ this.da_node_get_id(node) }`);
 
                 for(const node_edge_out of node_edges_out) 
-                    code.push(...this.da_build_logic(graph, node_edge_out.get_node_to(), 0));
+                    code.push(...this.da_build_logic(graph, node_edge_out.get_node_to()));
                 
                 break
             }
@@ -98,11 +96,6 @@ export class DocassembleTransformer implements ITransformer  {
         //     throw Error("Graph is missing atleast one end node")
 
         const blocks: Array<string[] | string> = [];
-        
-        // blocks.push([
-        //     'question: Start',
-        //     `subquestion: ${ node_start.content }`,
-        // ]);
         
         for (const node of graph.nodes) {
 
@@ -147,7 +140,7 @@ export class DocassembleTransformer implements ITransformer  {
                         `subquestion: ${ node.content }`,
                         `continue button field: ${ this.da_node_get_id(node) }`,
                     ]);
-                    
+
                     break
                 }
             }
