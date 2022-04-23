@@ -20,23 +20,32 @@ export interface Node {
     },
 }
 
-export interface Edge {
-    graph: Graph
-    id: Id,
-    node_from_id: Id,
-    node_to_id: Id,
-    
-    content: string | null,
+export const NodeDefault = {
+    appearance: {
+        x: 0, y: 0,
+        width: 100, height: 100
+    },
+    options: {},
+    content: '<empty>',
+    type: 'notice'
 }
 
-export abstract class Node {
+export class Node {
 
+    constructor(options: Partial<Node> & Pick<Node, 'graph'>) {
+        options.id = options.id ?? get_id()
+
+        Object.assign(this, NodeDefault, options);
+    }
+
+    /*
     constructor(graph: Graph, id: Id | null = null, content = '<empty>') {
         this.graph = graph;
         this.id = id ?? get_id();
 
         this.content = content;
     }
+    */
 
     get_edges_in() {
         return this.graph.edges
@@ -64,8 +73,35 @@ export abstract class Node {
 
 }
 
-export abstract class Edge {
 
+export interface Edge {
+    graph: Graph
+    id: Id,
+    node_from_id: Id,
+    node_to_id: Id,
+    
+    content: string | null,
+}
+
+export const EdgeDefault = {
+    appearance: {
+        x: 0, y: 0,
+        width: 100, height: 100
+    },
+    options: {},
+    content: '<empty>',
+    type: 'notice'
+}
+
+export class Edge {
+
+    constructor(options: Partial<Edge> & Pick<Edge, 'graph'>) {
+        options.id = options.id ?? get_id()
+
+        Object.assign(this, EdgeDefault, options);
+    }
+
+/*
     constructor(graph: Graph, id: Id | null = null, node_from_id: Id, node_to_id: Id, content: string | null = null) {
         this.graph = graph;
         this.id = id ?? get_id();
@@ -74,7 +110,7 @@ export abstract class Edge {
         this.node_to_id = node_to_id;
         this.content = content;
     }
-
+*/
     node_from() {
         return this.graph.nodes
             .filter(node => node.id == this.node_from_id)
@@ -92,13 +128,25 @@ class Graph {
     nodes: Array<Node> = [];
     edges: Array<Edge> = [];
 
-    constructor(name: string = 'Untitled graph') {
+    constructor(name = 'Untitled graph') {
         this.name = name;
     }
 
     get_nodes_by_type(type: keyof node_types) {
-        return this.nodes.filter(x => x.type == type);
+        return this.nodes.filter(x => x.type == type) ?? [];
     }
+
+    add_node(options: Partial<Node>) {
+        this.nodes.push(new Node({...options, graph: this}))
+    }
+
+    add_edge(options: Partial<Edge>) {
+        this.edges.push(new Edge({...options, graph: this}))
+    }
+
+    // add_node(graph: Graph, content = '<empty>') {
+    //     this.nodes.push(new Node({graph, id: get_id(), content}))
+    // }
     
     clear() {
         this.nodes = [];

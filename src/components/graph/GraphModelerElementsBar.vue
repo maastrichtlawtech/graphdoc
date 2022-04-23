@@ -35,7 +35,7 @@
     import { Dnd } from '@antv/x6/lib/addon/dnd';
     
     import { onMounted, Ref, ref, watch, computed } from 'vue';
-    import { graph_options, node_types } from '../../utils/graph';
+    import { graph_options, node_types } from '@/utils/model';
 
     const props = defineProps<{
         graph: Graph | undefined,

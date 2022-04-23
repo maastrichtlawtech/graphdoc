@@ -2,6 +2,8 @@ import { Cell, Graph as AntvGraph } from "@antv/x6";
 import { Base as ShapeBase } from "@antv/x6/lib/shape/base";
 import { default as Graph, } from "../graph";
 import { default_edge_label, node_types, node_type_default } from "../model";
+import * as _ from 'lodash';
+import { pick } from "../data/pick";
 
 export type Node = {
     id: number | string,
@@ -40,25 +42,25 @@ function indent(lines: string[], indent = 1, spaces_per = 2): string[] {
 export default class {
     graph: Graph;
     
-    constructor(graph: Graph | null) {
+    constructor(graph?: Graph) {
         this.graph = graph ?? new Graph();
     }
 
-    in_json(data: Object) {
+    in_json(data: Graph) {
         // const data = JSON.parse(data_json)
-
         // this.data = data;
         this.graph.clear();
 
-        this.graph.name = data.
+        this.graph.name = data.name;
+        // TODO: rest importing
 
         return this;
     }
     out_json() {
         
         const data = {
-            'nodes': this.graph.nodes,
-            'edges': this.graph.edges,
+            'nodes': this.graph.nodes.map(node => pick(node, 'id', 'type', 'content', 'appearance', 'options')),
+            'edges': this.graph.edges.map(edge => pick(edge, 'id', 'content', 'node_from_id', 'node_to_id')),
             'graph': {
                 'name': this.graph.name
             }
@@ -69,8 +71,8 @@ export default class {
 
 
     // inspired from: https://github.com/eensander/graph-quiz/blob/master/resources/js/components/dashboard/graph/GraphModeler.vue#L442
-    in_antv(graph: Graph) {
-        this.init_data();
+    in_antv(graph: AntvGraph) {
+        this.graph.clear();
 
         // const local_data = this.graph.toJSON();
         const local_data = {
@@ -78,7 +80,7 @@ export default class {
             'edges': graph.getEdges(),
         };
         
-        for(const loc_node of local_data.nodes as ShapeBase[]) {
+        for(const loc_node of local_data.nodes) {
             // console.log("loc_node", loc_node);
             
             const node_type = loc_node.getData()?.node_type ?? node_type_default;
@@ -86,16 +88,10 @@ export default class {
             const rem_node = {
                 // 'id': loc_node.store.data?.data?.node_id ?? 0,
                 id: loc_node.id,
-                // content: (loc_node as ShapeBase).getLabel() ?? '',
-                content: loc_node.getLabel() ?? '[no data]',
+                
+                content: loc_node.attr<string>('text/text') ?? '[no data]',
                 type: node_type,
                 appearance: {
-                    
-                    // x: loc_node.store.data?.position?.x ?? null,
-                    // y: loc_node.store.data?.position?.y ?? null,
-                    // width: loc_node.store.data?.size?.width ?? null,
-                    // height: loc_node.store.data?.size?.height ?? null,
-
                     x: loc_node.getPosition().x ?? 0,
                     y: loc_node.getPosition().y ?? 0,
                     width: loc_node.getSize().width
@@ -110,6 +106,7 @@ export default class {
                     // ...Object.fromEntries(
                     //     Object.entries(loc_node.store?.data).filter(([key, value]) => key === 'appearance') )
                     // ...loc_node.store?.data?.data?.options ?? {}
+
                     // other method, same as in deserialization
                     ...Object.fromEntries(Object.entries(loc_node.getData()?.options ?? {}).filter(([key, value]) => {
                         return !['node_id', 'appearance'].includes(key);
@@ -117,7 +114,8 @@ export default class {
                 },
             }
 
-            this.data?.nodes.push(rem_node)
+            // this.graph.nodes.push(rem_node)
+            this.graph.add_node(rem_node)
         }
 
         let alt_id_i = 1;
@@ -130,13 +128,7 @@ export default class {
 
             const rem_edge = {
                 id: loc_edge.getData()?.edge_id ?? alt_id_i++,
-
-                // 'node_from_id': parseInt(loc_edge.store.data?.source?.cell.split('-')[1],10) ?? null,
-                    // 'node_to_id': parseInt(loc_edge.store.data?.target?.cell.split('-')[1],10) ?? null,
-
-                // node_from_id: loc_edge.store.data?.source?.cell,
-                // node_to_id:   loc_edge.store.data?.target?.cell,
-
+                
                 node_from_id: loc_edge.getSourceCellId(),
                 node_to_id:   loc_edge.getTargetCellId(),
                 // content: loc_edge.labels?.[0]?.attrs?.text?.text ?? null,
@@ -147,7 +139,8 @@ export default class {
                 options: {},
             }
 
-            this.data?.edges.push(rem_edge)
+            // this.data?.edges.push(rem_edge)
+            this.graph.add_edge(rem_edge)
         }
 
         // this.data = serialized;
@@ -158,16 +151,11 @@ export default class {
 
     // inspired from: https://github.com/eensander/graph-quiz/blob/master/resources/js/components/dashboard/graph/GraphModeler.vue#L525
     out_antv() {
-        if (typeof this.data === "undefined")
-        {
-            console.error("Transformer contains no data to encode")
-            return {};
-        }
 
         const data_nodes: Array<any> = [];
         let last_x = 0;
         
-        Object.values(this.data.nodes).forEach((node) => {
+        Object.values(this.graph.nodes).forEach((node) => {
 
             let node_ser = {
                 x: node.appearance?.x ?? (last_x += 50),
@@ -217,7 +205,7 @@ export default class {
         
         const data_edges: Array<any> = [];
 
-        Object.values(this.data.edges).forEach((edge) => {
+        Object.values(this.graph.edges).forEach((edge) => {
             const edge_label = default_edge_label(edge.content);
 
             const edge_ser = {
@@ -260,16 +248,17 @@ export default class {
         return data;
     }
 
+    /*
     out_docassemble2(): string {
-        if (typeof this.data === "undefined")
-        {
-            console.error("Transformer contains no data to encode")
-            return '';
-        }
+        // if (typeof this.data === "undefined")
+        // {
+        //     console.error("Transformer contains no data to encode")
+        //     return '';
+        // }
 
         const blocks: Array<string[] | string> = [];
 
-        for (const node in this.data.nodes) {
+        for (const node in this.graph.nodes) {
             blocks.push(['hey']);
             console.log("node", node)
         }
@@ -293,6 +282,7 @@ export default class {
 
         return content;
     }
+    */
 
     da_node_get_id(node: Node): string {
         return `${ node.type }_${ node.id.toString().split('-')[0] }`
@@ -308,13 +298,13 @@ export default class {
         // const node_children = this.node_get_nodes_out(node.id)!
         // console.log("da_build_logic", node.content, indent)
 
-        const node_edges_out: Array<Edge & {node_to: Node}>  = this.data?.edges
+        const node_edges_out: Array<Edge & {node_to: Node}>  = this.graph.edges
             .filter(edge => edge.node_from_id == node.id)
 
             // flatMap: https://stackoverflow.com/a/59726888/17864167
             // add member: https://stackoverflow.com/a/44407980/17864167
             .flatMap(edge => {
-                const node_to = this.data?.nodes.find(n => n.id == edge.node_to_id) ?? null;
+                const node_to = this.graph.nodes.find(n => n.id == edge.node_to_id) ?? null;
                 return node_to ? [{...edge, node_to }] : []
             }) ?? []
         
@@ -368,15 +358,15 @@ export default class {
     }
 
     out_docassemble(): string {
-        if (typeof this.data === "undefined")
-            return 'contains errors';
+        // if (typeof this.data === "undefined")
+        //     return 'contains errors';
             // throw Error("Transformer contains no data to encode")
 
-        const node_start = this.get_nodes_by_type('start')![0]!;
+        const node_start = this.graph.get_nodes_by_type('start')[0];
         if (typeof node_start === "undefined")
             return 'no start node'
         //     throw Error("Graph is missing start node")
-        const nodes_end = this.get_nodes_by_type('end');
+        const nodes_end = this.graph.get_nodes_by_type('end');
         if (nodes_end?.length === 0)
             return 'no end node(s)'
         //     throw Error("Graph is missing atleast one end node")
@@ -388,7 +378,7 @@ export default class {
             `subquestion: ${ node_start.content }`,
         ]);
         
-        for (const node of this.data.nodes) {
+        for (const node of this.graph.nodes) {
 
             switch(node.type) {
                 case 'start':
@@ -397,7 +387,7 @@ export default class {
                     break
                 case 'decision': {
                     
-                    const edges_out = this.data?.edges
+                    const edges_out = this.graph.edges
                         .filter(edge => edge.node_from_id == node.id);
                     
                     let buttons: Array<string> = [];

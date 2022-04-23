@@ -86,7 +86,7 @@
 <script lang="ts" setup>
 
     import { computed, onMounted, ref } from 'vue';
-    import { default_edge_label, node_types, node_type_default } from '../../utils/graph'
+    import { default_edge_label, node_types, node_type_default } from '@/utils/model'
 
     import { Cell, Edge } from '@antv/x6'
 

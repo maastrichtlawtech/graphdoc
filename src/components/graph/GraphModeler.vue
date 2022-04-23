@@ -48,10 +48,9 @@
     import GraphModelerElementsBar from './GraphModelerElementsBar.vue'
     import GraphModelerToolbar from './GraphModelerToolbar.vue'
 
-    import { default_node_ports } from '../../utils/graph'
-    import { node_types } from '../../utils/graph'
-
-    import Transformer from '../../utils/transformer'
+    // import { default_node_ports, node_types } from '@/utils/model'
+    
+    import Transformer from '@/utils/transformer'
 
     const toast = useToast();
 
