@@ -37,8 +37,8 @@ export type graphData = {
 // export type labledNode = Cell & { label: string, getLabel(): string }
 
 export interface ITransformer {
-    in?(graph: Graph, ...params: any): Graph
-    out?(graph: Graph, ...params: any): any
+    in?: (graph: Graph, ...params: Array<any>) => Graph
+    out: (graph: Graph, ...params: Array<any>) => any
 }
 
 export default class {
@@ -57,6 +57,8 @@ export default class {
         this.docassemble = new DocassembleTransformer()
     }
 
+    // json
+
     in_json(data: Graph) {
         this.graph = this.json.in_json(this.graph, data);
 
@@ -67,15 +69,19 @@ export default class {
         return this.json.out_json(this.graph);
     }
 
-    in_antv(ant_graph: AntvGraph) {
-        this.graph = this.antvis.in_antv(this.graph, ant_graph)
+    // antv
+
+    in_antv(antv_graph: AntvGraph) {
+        this.graph = this.antvis.in(this.graph, antv_graph)
 
         return this;
     }
 
-    out_antv() {
-        return this.antvis.out_antv(this.graph)
-    }
+    // out_antv() {
+    //     return this.antvis.out(this.graph)
+    // }
+
+    // docassemble
 
     out_docassemble() {
         return this.docassemble.out(this.graph)

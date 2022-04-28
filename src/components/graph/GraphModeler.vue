@@ -47,23 +47,14 @@
     import GraphModelerConfigBar from './GraphModelerConfigBar.vue'
     import GraphModelerElementsBar from './GraphModelerElementsBar.vue'
     import GraphModelerToolbar from './GraphModelerToolbar.vue'
-
-    // import { default_node_ports, node_types } from '@/utils/model'
     
     import Transformer from '@/utils/transformer'
+    import { graph_options_defaults, graph_register_defaults } from '@/utils/model'
 
     const toast = useToast();
 
-    // const props = defineProps<{
-    //     remote_graph_data: Object,
-    //     remote_graph_data_reload: Function,
-    //     root_graph_id: Number,
-    // }>()
-
     onMounted(() => {
         init_modeler()
-
-        // watch(props.remote_graph_data, (value, old_value) => remote_load(value))
     })
 
     const graph_data: Ref<object> = ref({});
@@ -79,11 +70,10 @@
                 }
             },
             position: {
-                distance: .25,
+                distance: .3,
             },
         }
     };
-
 
     const docassemble_cont: Ref<string> = ref('');
 
@@ -91,13 +81,12 @@
         if (typeof graph.value == "undefined")
             return;
         
-        // console.log("docassemble conv called")
         docassemble_cont.value = (new Transformer()).in_antv(graph.value).out_docassemble();
         // docassemble_cont.value = JSON.stringify((new Transformer()).in_antv(graph.value).out_json());
     };
     
     const remote_load = (remote_data: any) => {
-        graph.value?.fromJSON((new Transformer()).in_json(remote_data).out_antv());
+        // graph.value?.fromJSON((new Transformer()).in_json(remote_data).out_antv());
     }
 
     const local_save = () => {
@@ -107,56 +96,30 @@
         new Transformer().in_antv(graph.value).out_json()
     }
 
-    const register_events = () => {
+    const register_events = (graph: Graph) => {
         // events
         // https://x6.antv.vision/en/docs/tutorial/intermediate/events
 
-        if (typeof graph.value === "undefined")
-            return false;
+        // if (typeof graph.value === "undefined")
+        //     return false;
 
-        graph.value.on('cell:change:*', docassemble_cont_update)
-        graph.value.on('cell:removed', docassemble_cont_update)
-        graph.value.on('cell:added', docassemble_cont_update)
+        graph.on('cell:change:*', docassemble_cont_update)
+        graph.on('cell:removed', docassemble_cont_update)
+        graph.on('cell:added', docassemble_cont_update)
 
-        graph.value.on('cell:selected', ({ cell, options }) => {
-            // console.log(cell)
+        graph.on('cell:selected', ({ cell, options }) => {
             if (selected_cell.value != cell)
-            {
                 selected_cell.value = cell
-            }
         })
 
-        graph.value.on('cell:unselected', ({ cell, options }) => {
+        graph.on('cell:unselected', ({ cell, options }) => {
             if (selected_cell.value != null)
                 selected_cell.value = undefined
         })
 
-        graph.value.on('blank:click', ({ e, x, y }) => {
+        graph.on('blank:click', ({ e, x, y }) => {
             if (selected_cell.value != null)
                 selected_cell.value = undefined
-        })
-
-        // https://x6.antv.vision/en/docs/api/registry/edge-tool
-        graph.value.on('edge:mouseenter', ({ cell }) => {
-            // console.log(cell)
-            cell.addTools(
-                [
-                    {
-                        name: 'button-remove',
-                        args: {
-                            distance: 20,
-                            fill: '#00ff00'
-                        },
-                    },
-                    'segments'
-                ],
-                'onhover',
-            )
-        })
-
-        graph.value.on('edge:mouseleave', ({ cell }) => {
-            // cell.removeTools('onhover')
-            cell.removeTool('onhover')
         })
     }
 
@@ -167,73 +130,19 @@
         let height = container.scrollHeight || 500;
 
         graph.value = new Graph({
+            ...graph_options_defaults,
+
             container: container,
-            grid: true,
             width,
             height,
-            mousewheel: {
-                enabled: true,
-                modifiers: ['ctrl', 'meta'],
-            },
-            scroller: {
-                enabled: true,
-                pannable: true,
-            },
-            history: {
-                enabled: true,
-                beforeAddCommand(event: any, args: any) {
-                    // console.log(event, args);
-                    // prevent adding/removing tools on hover to be added to history
-                    if (args.key == 'tools')
-                    {
-                        return false
-                    }
-                },
-            },
-            resizing: {
-                enabled: true,
-            },
-            selecting: {
-                enabled: true,
-                // showNodeSelectionBox: true,
-            },
-
-            connecting: {
-                // anchor: 'center',
-                // connectionPoint: 'anchor',
-
-                // https://x6.antv.vision/en/docs/tutorial/intermediate/interacting/#%E8%BF%9E%E7%BA%BF%E8%A7%84%E5%88%99
-                allowBlank: false,
-                allowMulti: false,
-                allowLoop: false,
-                allowNode: true,
-                allowEdge: false,
-                allowPort: false,
-
-                highlight: true,
-                snap: true,
-
-                validateEdge(e) {
-                    const edge = e.edge;
-                    if (edge != null)
-                    {
-                        console.log("edge data", e.edge)
-
-                        // const source_node_id = e.edge.getData().source?.cell ?? null;
-                        // if (source_node_id != null)
-                        //     e.edge.setSource({cell: source_node_id}) // move from output port to node itself, for 'easier' saving
-
-                        // e.edge.addTools();
-                    }
-
-                    return true;
-                },
-            },
-
         })
 
-        register_events()
-        // window.graph_main = this.graph;
+        if(graph.value != undefined)
+        {
+            graph_register_defaults(graph.value)
+            register_events(graph.value)
+            // window.graph_main = this.graph;
+        }
 
     };
 

@@ -35,7 +35,7 @@
     import { Dnd } from '@antv/x6/lib/addon/dnd';
     
     import { onMounted, Ref, ref, watch, computed } from 'vue';
-    import { graph_options, node_types } from '@/utils/model';
+    import { graph_options_defaults, node_types } from '@/utils/model';
 
     const props = defineProps<{
         graph: Graph | undefined,
@@ -136,10 +136,12 @@
         }
 
         const node = props.graph.createNode(node_types[type as keyof node_types].antv_metadata);
+
         // node.label = type
         // node.setData({label: type})
         
-        (node as any).setLabel(type)
+        // (node as any).setLabel(type)
+        node.setAttrByPath('text/text', type)
         
         dnd.value?.start(node, e)
 
@@ -154,7 +156,7 @@
         margin-top: 2rem;
 
         .shape {
-            @apply mb-1 p-2 bg-gray-200 border-gray-300 border-b-2  border-t;
+            @apply mb-1 p-2 bg-gray-200 border-gray-300 border-b-2 border-t;
         }
 
     }

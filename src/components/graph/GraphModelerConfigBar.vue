@@ -47,6 +47,10 @@
                             </select>
                         </label>
                         -->
+
+                        <span v-else>
+                            <span class="text-gray-700 block mb-1">Undefined field: {{ field.charAt(0).toUpperCase() + field.slice(1) }}</span>
+                        </span>
                     </div>
                 </div>
             </div>
@@ -67,6 +71,7 @@
                         <span class="text-gray-700 block mb-1">Label</span>
                         <input
                             type="text"
+                            class="w-full"
                             :value="edge_get_label(cell)" 
                             @input="event => edge_set_label((event.target as HTMLInputElement).value)" />
                     </label>
@@ -88,7 +93,7 @@
     import { computed, onMounted, ref } from 'vue';
     import { default_edge_label, node_types, node_type_default } from '@/utils/model'
 
-    import { Cell, Edge } from '@antv/x6'
+    import { Cell, Edge, Node } from '@antv/x6'
 
     // const props = defineProps({
     //     cell: {
@@ -107,37 +112,50 @@
         // });
     })
 
-    const null_value = null;
-
-    const subgraph_options = ref(null);
+    // const null_value = null;
+    // const subgraph_options = ref(null);
     
     const current_fields = computed(() => {
         const field = props.cell?.getData()?.node_type ?? node_type_default;
-        
+        let current_node_fields = null;
+
         if (Object.keys(node_types).includes(field))
-            return node_types[field as keyof node_types];
+            current_node_fields = node_types[field as keyof node_types].config_fields;
         else
-            return node_types[node_type_default];
+            current_node_fields = node_types[node_type_default].config_fields;
+
+        // https://stackoverflow.com/a/62400741/17864167
+        return Object.fromEntries(
+            Object.entries(current_node_fields)
+                .filter(([key, val]) => val.length > 0)
+        )
     });
 
     const node_label = computed({
         get() {
-            return (props.cell as any).getLabel();
+            // https://github.com/antvis/X6/issues/2020#issuecomment-1104644438
+            return (props.cell as Node).getAttrByPath('text/text') as string
         },
         set(value: string) {
-            (props.cell as any).setLabel(value);
+            (props.cell as Node).setAttrByPath('text/text', value)
         }
     });
 
+    /*
     const node_get_label = () => {
         // return this.cell.store?.data?.labels?.[0] ?? '';
-        return (props.cell as any).getLabel();
+        // return (props.cell as any).getLabel();
+
+        // https://github.com/antvis/X6/issues/2020#issuecomment-1104644438
+        return (props.cell as Node).getAttrByPath('text/text')
     };
     
-    const node_set_label = (content?: string) => {
-        (props.cell as any).setLabel(content);
-    }
+    const node_set_label = (content: string) => {
+        // (props.cell as any).setLabel(content);
 
+        (props.cell as Node).setAttrByPath('text/text', content)
+    }
+    */
 
     const edge_get_label = () => {
         // return this.cell.store?.data?.labels?.[0] ?? '';

@@ -1,18 +1,19 @@
 import Graph from "../graph";
 import { Graph as AntvGraph } from "@antv/x6";
 import { default_edge_label, node_types, node_type_default } from "../model";
+import { ITransformer } from ".";
 
-export class AntvisTransformer {
+export class AntvisTransformer implements ITransformer {
 
 
     // inspired from: https://github.com/eensander/graph-quiz/blob/master/resources/js/components/dashboard/graph/GraphModeler.vue#L442
-    in_antv(graph: Graph, ant_graph: AntvGraph): Graph {
+    in(graph: Graph, antv_graph: AntvGraph): Graph {
         graph.clear();
 
         // const local_data = this.graph.toJSON();
         const local_data = {
-            'nodes': ant_graph.getNodes(),
-            'edges': ant_graph.getEdges(),
+            'nodes': antv_graph.getNodes(),
+            'edges': antv_graph.getEdges(),
         };
         
         for(const loc_node of local_data.nodes) {
@@ -89,7 +90,7 @@ export class AntvisTransformer {
     }
 
     // inspired from: https://github.com/eensander/graph-quiz/blob/master/resources/js/components/dashboard/graph/GraphModeler.vue#L525
-    out_antv(graph: Graph) {
+    out(graph: Graph) {
 
         const data_nodes: Array<any> = [];
         let last_x = 0;
