@@ -1,14 +1,16 @@
 <template>
 
+    <div class="mb-4">
+        <h1 class="text-4xl font-serif mb-1">Welcome to graph-doc</h1>
+        <p>
+            This tool serves as a PoC to convert simple flowcharts to docassemble interviews. 
+            The goal of this tool is provide a intuitive interface for constructing docassemble interviews, 
+            in which relations between and dependancy of nodes are directly visible.
+        </p>
+        <p><span class="font-bold">Start</span> by dragging nodes from the left sidebar.</p>
+    </div>
     <div class="border border-gray-400 rounded overflow-hidden">
-        <div class="w-full bg-gray-100 ">
-            <!-- <GraphModelerToolbar v-if="graph !== null" 
-                :remote_graph_data="remote_graph_data" 
-                :graph="graph" 
-                :remote_graph_data_reload="remote_graph_data_reload"
-                :local_save="local_save">
-            </GraphModelerToolbar> -->
-
+        <div class="w-full bg-gray-100">
             <GraphModelerToolbar
                 :graph="graph" 
                 :docassemble_cont_update="docassemble_cont_update"
@@ -101,7 +103,7 @@
         if(docassemble_validation_errors.value.length == 0)
             docassemble_cont.value = (new Transformer()).in_antv(graph.value).out_docassemble();
         else
-            docassemble_cont.value = 'graph contains errors';
+            docassemble_cont.value = '-';
         
         // docassemble_cont.value = JSON.stringify((new Transformer()).in_antv(graph.value).out_json());
     };
