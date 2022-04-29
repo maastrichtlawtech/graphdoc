@@ -56,8 +56,8 @@ export const graph_options_defaults: Partial<Options.Manual> = {
 
         // https://x6.antv.vision/en/examples/showcase/practices#dag
         connector: 'algo-connector',
-        connectionPoint: 'anchor',
-        anchor: 'center',
+        connectionPoint: 'boundary',
+        anchor: 'top',
 
         validateMagnet({ e, magnet, view, cell }) {
             console.log("magnet", e, magnet, view, cell)
@@ -71,7 +71,7 @@ export const graph_options_defaults: Partial<Options.Manual> = {
                         strokeWidth: '1',
                     },
                 },
-                // zIndex: 2,
+                zIndex: -1,
             })
         },
 
