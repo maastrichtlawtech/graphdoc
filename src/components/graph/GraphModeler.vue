@@ -26,8 +26,16 @@
             </div>
         </div>
     </div>
-    <div>
-        <span>Conversion errors: </span>
+    <div class="border border-gray-600 rounded my-2 p-2">
+        <template v-if="docassemble_validation_errors.length > 0">
+            <span class="block ">Validation errors</span>
+            <ul class="list-disc list-inside">
+                <li class="text-red-800" v-for="validation_error in docassemble_validation_errors" :key="validation_error">
+                    {{ validation_error }}
+                </li>
+            </ul>
+        </template>
+        <span v-else class="block text-green-800">Graph contains no errors</span>
     </div>
     <div class="mt-4">
         <span>Docassemble out:</span>
@@ -40,7 +48,7 @@
 
 <script lang="ts" setup>
 
-    import { computed, onMounted, Ref, ref, watch } from 'vue';
+    import { computed, onMounted, reactive, Ref, ref, watch } from 'vue';
 
     import { useToast } from "vue-toastification";
 
@@ -53,6 +61,7 @@
     
     import Transformer from '@/utils/transformer'
     import { graph_options_defaults, graph_register_defaults } from '@/utils/model'
+    import { DocassembleTransformer } from '@/utils/transformer/docassemble';
 
     const toast = useToast();
 
@@ -78,13 +87,21 @@
         }
     };
 
+    const docassemble_validation_errors: Ref<string[]> = ref([]);
     const docassemble_cont: Ref<string> = ref('');
 
     const docassemble_cont_update = () => {
         if (typeof graph.value == "undefined")
             return;
         
-        docassemble_cont.value = (new Transformer()).in_antv(graph.value).out_docassemble();
+        const transformer = (new Transformer()).in_antv(graph.value);
+
+        docassemble_validation_errors.value = (new DocassembleTransformer()).validate_graph(transformer.graph);
+        if(docassemble_validation_errors.value.length == 0)
+            docassemble_cont.value = (new Transformer()).in_antv(graph.value).out_docassemble();
+        else
+            docassemble_cont.value = 'graph contains errors';
+        
         // docassemble_cont.value = JSON.stringify((new Transformer()).in_antv(graph.value).out_json());
     };
     

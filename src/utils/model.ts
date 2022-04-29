@@ -121,7 +121,7 @@ export function graph_register_defaults(graph: Graph) {
                 {
                     name: 'button-remove',
                     args: {
-                        distance: 20,
+                        distance: 30,
                         fill: '#00ff00'
                     },
                 },

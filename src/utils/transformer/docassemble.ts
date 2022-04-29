@@ -4,17 +4,50 @@ import { indent } from "@/utils/data/indent"
 
 export class DocassembleTransformer implements ITransformer  {
 
-    /*
-    validate_graph(graph: Graph) {
+    validate_graph(graph: Graph): string[] {
+        const errors = [];
+
         const node_start = graph.get_nodes_by_type('start')[0];
         if (typeof node_start === "undefined")
-            return 'no start node'
-        //     throw Error("Graph is missing start node")
+            errors.push('graph must have one start node')
         const nodes_end = graph.get_nodes_by_type('end');
         if (nodes_end?.length === 0)
-            return 'no end node(s)'
+            errors.push('graph must have atleast one end node')
+
+        const nodes_decision = graph.get_nodes_by_type('decision');
+        for(const node_decision of nodes_decision) {
+            let has_edge_out_content_null = false;
+            for (const edge_out of node_decision.get_edges_out()) {
+                if (edge_out.content == null) {
+                    has_edge_out_content_null = true;
+                    break;
+                }
+            }
+            
+            if (has_edge_out_content_null)
+                errors.push(`decision node with label ${node_decision.content} has atleast one outgoing edge with no content`)
+        }
+
+        for (const node of graph.nodes) {
+            if (node.type == 'start' && node.get_edges_out().length !== 1)
+                errors.push(`start node with label ${node.content} must have one outgoing edge`)
+            if (node.type == 'start' && node.get_edges_in().length > 0)
+                errors.push(`start node with label ${node.content} must have no ingoing edges`)
+
+            // else if (node.type == 'decision' && node.get_edges_out().length === 1)
+            //     errors.push(`decision node with label ${node.content} has one outgoing edge, which makes it purpose trivial`) // recommendation
+            else if (node.type == 'decision' && node.get_edges_out().length === 0)
+                errors.push(`decision node with label ${node.content} must have atleast one outgoing edge`)
+
+            else if (node.type == 'notice' && node.get_edges_out().length > 1)
+                errors.push(`notice node with label ${node.content} must have atmost one outgoing edge`)
+
+            else if (node.type == 'end' && node.get_edges_in().length === 0)
+                errors.push(`end node with label ${node.content} must have one ingoing edge`)
+        }
+
+        return errors;
     }
-    */
     
     da_node_get_id(node: Node): string {
         return `${ node.type }_${ node.id.toString().split('-')[0] }`
