@@ -3,13 +3,17 @@
     <!-- <span>{{ cell }}</span> -->
 
     <div v-if="cell == null">
-        <span class="block p-2">Select a node or edge to configure</span>
+        <span class="block p-2 text-gray-700">Select a node or edge to configure</span>
     </div>
 
     <div v-else-if="cell.isNode()" class="w-full">
     
         <div class="">
             <span class="m-2 font-bold block text-2xl border-b border-gray-300">Node: {{ (cell as any).store.data.data.node_type }}</span>
+            
+            <div class="p-2">
+                <button @click="cell?.remove()" class="action-btn-remove">Remove</button>
+            </div>
 
             <div v-for="(fields, field_group) in current_fields" :key="field_group">
                 <div class="p-2">
@@ -36,18 +40,6 @@
                         </label>
                         -->
 
-                        <!--
-                        <label v-else-if="field == 'subgraph'">
-                            <span class="text-gray-700 block mb-1">Subgraph</span>
-                            <select class="w-full" v-model="cell.store.data.data.options.graph_id">
-                                <option :value="undefined">None</option>
-                                <option v-for="subgraph_option in subgraph_options" :value="subgraph_option.id">
-                                    {{ subgraph_option.id }}) {{ subgraph_option.name }}
-                                </option>
-                            </select>
-                        </label>
-                        -->
-
                         <span v-else>
                             <span class="text-gray-700 block mb-1">Undefined field: {{ field.charAt(0).toUpperCase() + field.slice(1) }}</span>
                         </span>
@@ -62,6 +54,10 @@
     <div v-else-if="cell.isEdge()" class="w-full">
         <div class="">
             <span class="m-2 font-bold block text-2xl border-b border-gray-300">Edge</span>
+
+            <div class="p-2">
+                <button @click="cell?.remove()" class="action-btn-remove">Remove</button>
+            </div>
 
             <div class="p-2">
                 <span class="my-2 block border-b border-gray-300 uppercase font-bold text-sm text-gray-800">General</span>
@@ -191,6 +187,11 @@
 
 input {
     @apply border border-gray-200;
+}
+
+button.action-btn-remove {
+    @apply font-normal bg-red-100 hover:bg-red-200 border border-red-200;
+    @apply hover:border-red-400  text-red-900 px-3 py-0.5 rounded;
 }
 
 </style>

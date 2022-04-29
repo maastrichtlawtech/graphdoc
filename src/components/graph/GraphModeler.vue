@@ -4,22 +4,22 @@
         <span>
             <h1 class="text-4xl font-serif inline">Welcome to graph-doc</h1> 
             <!-- <button @click="read_more = !read_more" class="shadow-sm border border-gray-300 ml-4 py-1 px-2 bg-gray-100 text-gray-700 hover:text-gray-900 hover:border-gray-400">read more</button> -->
-            <button @click="read_more = !read_more" class="hover:underline pl-6 py-1 px-2  text-gray-600 hover:text-gray-900">read {{ read_more ? 'less' : 'more' }}</button>
+            <button @click="read_more = !read_more" class="font-normal underline-offset-4 underline hover:no-underline pl-6 py-1 px-2  text-gray-600 hover:text-gray-900">read {{ read_more ? 'less' : 'more' }}</button>
         </span>
-        <template v-if="read_more">
+        <div v-if="read_more" class="text-sm">
             <p class="mt-2">
                 This tool serves as a PoC to convert simple flowcharts to docassemble interviews. 
                 The goal of this tool is to provide an intuitive interface for constructing docassemble interviews, 
                 in which relations and dependencies between nodes ('blocks') are more clearly visible.
             </p>
-            <h2 class="text-xl font-serif mt-2 mb-1">Usage</h2>
+            <h2 class="text-lg font-serif mt-2 mb-1">Usage</h2>
             <p>
                 Start by dragging nodes from the left sidebar.
                 Connect nodes by dragging edges from and to the ports of the nodes.
                 Configure nodes and edges by clicking on their cells and filling in the details in the config sidebar on the right.
                 If no output is produced, interpret the validation errors presented above the docassemble output window.
             </p>
-        </template>
+        </div>
     </div>
     <div class="border border-gray-400 rounded overflow-hidden">
         <div class="w-full bg-gray-100">
@@ -40,11 +40,11 @@
             </div>
         </div>
     </div>
-    <div class="border border-gray-500 rounded mt-4 mb-2 py-2 px-3">
+    <div class="border border-gray-500 rounded mt-4 mb-2 py-2 px-3" :class="{ 'bg-red-50': docassemble_validation_errors.length > 0 }">
         <template v-if="docassemble_validation_errors.length > 0">
             <span class="block underline">Validation errors</span>
             <ul class="list-disc list-inside">
-                <li class="text-red-800" v-for="validation_error in docassemble_validation_errors" :key="validation_error">
+                <li class="text-red-900" v-for="validation_error in docassemble_validation_errors" :key="validation_error">
                     {{ validation_error }}
                 </li>
             </ul>

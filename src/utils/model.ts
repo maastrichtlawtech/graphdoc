@@ -60,7 +60,7 @@ export const graph_options_defaults: Partial<Options.Manual> = {
         anchor: 'top',
 
         validateMagnet({ e, magnet, view, cell }) {
-            console.log("magnet", e, magnet, view, cell)
+            // console.log("magnet", e, magnet, view, cell)
             return magnet.getAttribute('port-group') !== 'in'
         },
         createEdge(this) {
@@ -125,16 +125,24 @@ export function graph_register_defaults(graph: Graph) {
                         fill: '#00ff00'
                     },
                 },
-                // 'segments'
-            ],
-            'onhover',
+            ]
         )
     })
 
     graph.on('edge:mouseleave', ({ cell }) => {
-        // cell.removeTools('onhover')
-        
-        cell.removeTool('onhover')
+        setTimeout(() => {
+            cell.removeTool('button-remove')
+        }, 1500)
+    })
+
+    graph.on('node:mouseenter', ({ cell }) => {
+        cell.addTools([{name: 'button-remove'}])
+    })
+
+    graph.on('node:mouseleave', ({ cell }) => {
+        setTimeout(() => {
+            cell.removeTool('button-remove')
+        }, 500)
     })
 
     Graph.registerConnector('algo-connector', (s, e) => {
@@ -185,7 +193,7 @@ export function default_node_ports(ports: Array<keyof typeof default_port_groups
 
     for (const port_group of ports) {
         default_ports.items.push({
-            id: `${port_group}-something`,
+            id: `${port_group}-1`,
             group: port_group,
         })
     }
@@ -249,7 +257,7 @@ export const node_types: node_types = {
         antv_metadata: {
             shape: 'html',
             html: node_html,
-            tools: ['button-remove'],
+            // tools: ['button-remove'],
             width: 180,
             height: 36,
             data: {
@@ -271,7 +279,7 @@ export const node_types: node_types = {
         antv_metadata: {
             shape: 'html',
             html: node_html,
-            tools: ['button-remove'],
+            // tools: ['button-remove'],
             width: 180,
             height: 36,
 
@@ -295,7 +303,7 @@ export const node_types: node_types = {
         antv_metadata: {
             shape: 'html',
             html: node_html,
-            tools: ['button-remove'],
+            // tools: ['button-remove'],
             width: 180,
             height: 36,
             
@@ -318,7 +326,7 @@ export const node_types: node_types = {
         antv_metadata: {
             shape: 'html',
             html: node_html,
-            tools: ['button-remove'],
+            // tools: ['button-remove'],
             width: 180,
             height: 36,
             

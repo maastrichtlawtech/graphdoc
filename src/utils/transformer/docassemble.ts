@@ -17,11 +17,18 @@ export class DocassembleTransformer implements ITransformer  {
         const nodes_decision = graph.get_nodes_by_type('decision');
         for(const node_decision of nodes_decision) {
             let has_edge_out_content_null = false;
+            const content_edges_out = [];
+
             for (const edge_out of node_decision.get_edges_out()) {
-                if (edge_out.content == null) {
+                if (edge_out.content == null)
                     has_edge_out_content_null = true;
-                    break;
-                }
+                
+                // if length == 1, to ensure it's only printed once
+                if (content_edges_out.filter(x => x == edge_out.content).length == 1)
+                    errors.push(`decision node with label '${node_decision.content}' has multiple edges with content '${ edge_out.content }' (should be unique)`)
+                
+                if (edge_out.content != null)
+                    content_edges_out.push(edge_out.content)
             }
             
             if (has_edge_out_content_null)

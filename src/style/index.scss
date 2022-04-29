@@ -9,6 +9,11 @@ $node_decision_color: #6A7FDB;
 $node_notice_color: #9a969c;
 $node_end_color: #DF5361;
 
+html {
+    // to prevent 'jumping' of content when overflow occurs
+    overflow-y: scroll;
+}
+
 .node {
 
     @apply block w-full h-full flex items-center pl-3 text-sm;
