@@ -3,7 +3,7 @@
     <!-- <span>{{ cell }}</span> -->
 
     <div v-if="cell == null">
-        <span class="block p-2">No element is selected</span>
+        <span class="block p-2">Select a node or edge to configure</span>
     </div>
 
     <div v-else-if="cell.isNode()" class="w-full">
