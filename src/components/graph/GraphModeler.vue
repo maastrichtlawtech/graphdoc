@@ -26,6 +26,9 @@
             </div>
         </div>
     </div>
+    <div>
+        <span>Conversion errors: </span>
+    </div>
     <div class="mt-4">
         <span>Docassemble out:</span>
         <div class="w-full min-h-4 font-mono border p-2 mt-1 whitespace-pre-wrap">
