@@ -67,6 +67,7 @@
 
     onMounted(() => {
         init_modeler()
+        docassemble_cont_update()
     })
 
     const graph_data: Ref<object> = ref({});
