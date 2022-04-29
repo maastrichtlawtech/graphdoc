@@ -4,10 +4,10 @@
         <h1 class="text-4xl font-serif mb-1">Welcome to graph-doc</h1>
         <p>
             This tool serves as a PoC to convert simple flowcharts to docassemble interviews. 
-            The goal of this tool is provide a intuitive interface for constructing docassemble interviews, 
-            in which relations between and dependancy of nodes are directly visible.
+            The goal of this tool is to provide an intuitive interface for constructing docassemble interviews, 
+            in which relations between and dependancy of nodes ('blocks') more clearly visible.
         </p>
-        <p><span class="font-bold">Start</span> by dragging nodes from the left sidebar.</p>
+        <p class="my-1"><span class="font-bold">Start</span> by dragging nodes from the left sidebar.</p>
     </div>
     <div class="border border-gray-400 rounded overflow-hidden">
         <div class="w-full bg-gray-100">

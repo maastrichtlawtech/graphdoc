@@ -18,10 +18,11 @@
         <div class="toolbar-item">
             <button :disabled="typeof graph === 'undefined'" @click="item_redo()">Redo</button>
         </div>
-
+        <!-- 
         <div class="toolbar-item">
             <button :disabled="typeof graph === 'undefined'" @click="item_regenerate_docassemble()">Regenerate</button>
         </div>
+        -->
     </div>
 
 </template>
