@@ -75,10 +75,11 @@ export const graph_options_defaults: Partial<Options.Manual> = {
             })
         },
 
-        /*validateEdge({edge, type, previous}) {
+        validateEdge({edge, type, previous}) {
             console.log("edge data", edge)
+            // TODO: only allow (multiple) for decision
             return true;
-        },*/
+        },
 
         validateConnection({edge, sourceMagnet, targetMagnet}) {
             if (sourceMagnet == null || targetMagnet == null)
