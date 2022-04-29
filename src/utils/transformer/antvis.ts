@@ -25,7 +25,8 @@ export class AntvisTransformer implements ITransformer {
                 // 'id': loc_node.store.data?.data?.node_id ?? 0,
                 id: loc_node.id,
                 
-                content: loc_node.attr<string>('text/text') ?? '[no data]',
+                // content: loc_node.attr<string>('text/text') ?? '[no data]',
+                content: loc_node.getData().label ?? '[no data]',
                 type: node_type,
                 appearance: {
                     x: loc_node.getPosition().x ?? 0,

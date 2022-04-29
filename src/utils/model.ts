@@ -1,5 +1,5 @@
 
-import { Graph, Node, Path } from '@antv/x6';
+import { Cell, Graph, Node, Path } from '@antv/x6';
 import { Options } from '@antv/x6/lib/graph/options';
 
 import '@antv/x6-vue-shape'
@@ -15,7 +15,7 @@ export const default_edge_label = (text: string | null = '') => {
             }
         },
         position: {
-            distance: .25,
+            distance: .40,
         },
     }
 }
@@ -56,32 +56,36 @@ export const graph_options_defaults: Partial<Options.Manual> = {
 
         // https://x6.antv.vision/en/examples/showcase/practices#dag
         connector: 'algo-connector',
-        connectionPoint: 'boundary',
-        // anchor: 'center',
+        connectionPoint: 'anchor',
+        anchor: 'center',
 
-        validateMagnet({ magnet }) {
-          return magnet.getAttribute('port-group') !== 'in'
+        validateMagnet({ e, magnet, view, cell }) {
+            console.log("magnet", e, magnet, view, cell)
+            return magnet.getAttribute('port-group') !== 'in'
         },
-        // createEdge(this) {
-        //     return this.createEdge({
-        //         shape: 'dag-edge',
-        //         attrs: {
-        //             line: {
-        //                 strokeDasharray: '5 5',
-        //             },
-        //         },
-        //         zIndex: -1,
-        //     })
-        // },
+        createEdge(this) {
+            return this.createEdge({
+                // shape: 'dag-edge',
+                attrs: {
+                    line: {
+                        strokeWidth: '1',
+                    },
+                },
+                // zIndex: 2,
+            })
+        },
 
-        validateEdge(e) {
-            const edge = e.edge;
-            if (edge != null)
-            {
-                console.log("edge data", e.edge)
-            }
-
+        /*validateEdge({edge, type, previous}) {
+            console.log("edge data", edge)
             return true;
+        },*/
+
+        validateConnection({edge, sourceMagnet, targetMagnet}) {
+            if (sourceMagnet == null || targetMagnet == null)
+                return false;
+            
+            return sourceMagnet.getAttribute('port-group') == "out" &&
+                 targetMagnet.getAttribute('port-group') == "in";
         },
     },
 
@@ -97,7 +101,7 @@ export const graph_options_defaults: Partial<Options.Manual> = {
         },
     },
     resizing: {
-        enabled: true,
+        enabled: false,
     },
     selecting: {
         enabled: true,
@@ -120,7 +124,7 @@ export function graph_register_defaults(graph: Graph) {
                         fill: '#00ff00'
                     },
                 },
-                'segments'
+                // 'segments'
             ],
             'onhover',
         )
@@ -201,13 +205,12 @@ export type node_types = {
 };
 export const node_type_default = 'notice';
 
-
 Graph.registerNode("vue-start", {
     inherit: "vue-shape",
     // x: 200,
     // y: 150,
-    width: 150,
-    height: 100,
+    width: 300,
+    height: 20,
     component: {
         template: `<div>{{ node.getData().label }}</div>`,
         inject: ["getGraph", "getNode"],
@@ -222,18 +225,32 @@ Graph.registerNode("vue-start", {
     },
 });
 
-/*
+
 import start from '@/components/graph/nodes/start.vue'
+
+const node_html = {
+    render(node: Node) {
+        const data = node.getData() as any
+        return(
+            `<div class="node node-${ data.node_type }">
+                <span>${ data.label ?? '' }</span>
+            </div>`
+        )
+    },
+    shouldComponentUpdate(node: Node) {
+        return node.hasChanged('data')
+    },
+}
 
 export const node_types: node_types = {
     // https://github.com/eensander/graph-quiz/blob/master/resources/js/components/dashboard/graph/GraphModeler.vue#L112
     start: {
         antv_metadata: {
-            shape: 'vue-shape',
-            component: start,
-            // tools: ['button-remove'],
-            width: 100,
-            height: 40,
+            shape: 'html',
+            html: node_html,
+            tools: ['button-remove'],
+            width: 180,
+            height: 36,
             data: {
                 node_type: 'start',
                 options: {}
@@ -251,24 +268,12 @@ export const node_types: node_types = {
     },
     decision: {
         antv_metadata: {
-            shape: 'polygon',
+            shape: 'html',
+            html: node_html,
             tools: ['button-remove'],
-            width: 100,
-            height: 80,
-            // https://x6.antv.vision/zh/examples/node/native-node#polygon
-            points: '0,10 10,0 20,10 10,20',
-            attrs: {
-                body: {
-                    fill: '#93C5FD', // reference tailwind-css's default colors
-                    stroke: '#1E3A8A',
-                    strokeWidth: 1,
-                },
-                label: {
-                    fill: '#1E3A8A',
-                    fontSize: 13,
-                    textWrap: { width: 100 }
-                },
-            },
+            width: 180,
+            height: 36,
+
             data: {
                 node_type: 'decision',
                 options: {}
@@ -287,22 +292,12 @@ export const node_types: node_types = {
     },
     notice: {
         antv_metadata: {
-            shape: 'rect',
+            shape: 'html',
+            html: node_html,
             tools: ['button-remove'],
-            width: 100,
-            height: 40,
-            attrs: {
-                body: {
-                    fill: '#A7F3D0', // reference tailwind-css's default colors
-                    stroke: '#064E3B',
-                    strokeWidth: 1,
-                },
-                label: {
-                    fill: '#064E3B',
-                    fontSize: 13,
-                    textWrap: { width: -10 }
-                }
-            },
+            width: 180,
+            height: 36,
+            
             data: {
                 node_type: 'notice',
                 options: {}
@@ -320,22 +315,12 @@ export const node_types: node_types = {
     },
     end: {
         antv_metadata: {
-            shape: 'ellipse',
+            shape: 'html',
+            html: node_html,
             tools: ['button-remove'],
-            width: 100,
-            height: 40,
-            attrs: {
-                body: {
-                    fill: '#FECACA', // reference tailwind-css's default colors
-                    stroke: '#7F1D1D',
-                    strokeWidth: 1,
-                },
-                label: {
-                    fill: '#7F1D1D',
-                    fontSize: 13,
-                    textWrap: { width: -10 }
-                },
-            },
+            width: 180,
+            height: 36,
+            
             data: {
                 node_type: 'end',
                 options: {}
@@ -349,9 +334,9 @@ export const node_types: node_types = {
         }
     }
 }
-*/
 
 
+/*
 export const node_types: node_types = {
     // https://github.com/eensander/graph-quiz/blob/master/resources/js/components/dashboard/graph/GraphModeler.vue#L112
     start: {
@@ -487,3 +472,4 @@ export const node_types: node_types = {
         }
     }
 }
+*/

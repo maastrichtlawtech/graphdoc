@@ -134,10 +134,14 @@
     const node_label = computed({
         get() {
             // https://github.com/antvis/X6/issues/2020#issuecomment-1104644438
-            return (props.cell as Node).getAttrByPath('text/text') as string
+            // return (props.cell as Node).getAttrByPath('text/text') as string
+
+            return (props.cell as Node).getData().label ?? '';
         },
         set(value: string) {
-            (props.cell as Node).setAttrByPath('text/text', value)
+            // (props.cell as Node).setAttrByPath('text/text', value)
+
+            (props.cell as Node).setData({label: value});
         }
     });
 

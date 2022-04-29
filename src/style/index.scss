@@ -1,3 +1,77 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+$node_start_color: #03C956;
+$node_decision_color: #6A7FDB;
+/* $node_notice_color: #F4D301; */
+/* $node_notice_color: #DFC201; */
+$node_notice_color: #9a969c;
+$node_end_color: #DF5361;
+
+.node {
+
+    @apply block w-full h-full flex items-center pl-3 text-sm;
+    @apply rounded;
+
+    border: 1px solid rgb(177, 177, 177);
+    background-color: white;
+    /* border-bottom: 4px solid rgb(38, 179, 38); */
+    
+    span {
+        @apply truncate;
+    }
+
+    &.node-start {
+        border-bottom: 4px solid $node_start_color;
+    }
+
+    &.node-decision {
+        border-bottom: 4px solid $node_decision_color;
+    }
+
+    &.node-notice {
+        border-bottom: 4px solid $node_notice_color;
+    }
+
+    &.node-end {
+        border-bottom: 4px solid $node_end_color;
+    }
+}
+
+.x6-cell {
+    &.x6-node {
+        &.x6-node-selected {
+            .node-start {
+                border-color: $node_start_color;
+                box-shadow: 0 0 0 4px rgba($node_start_color, 0.2);
+            }
+        
+            .node-decision {
+                border-color: $node_decision_color;
+                box-shadow: 0 0 0 4px rgba($node_decision_color, 0.2);
+            }
+        
+            .node-notice {
+                border-color: $node_notice_color;
+                box-shadow: 0 0 0 4px rgba($node_notice_color, 0.25);
+            }
+        
+            .node-end {
+                border-color: $node_end_color;
+                box-shadow: 0 0 0 4px rgba($node_end_color, 0.2);
+            }
+        }
+    }
+
+    &.x6-edge {
+        &:hover path:nth-child(2) {
+
+        }
+
+        &.x6-edge-selected path {
+            stroke: #1890ff;
+            stroke-width: 1.5px !important;
+        }
+    }
+}

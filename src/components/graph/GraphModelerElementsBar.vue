@@ -141,7 +141,8 @@
         // node.setData({label: type})
         
         // (node as any).setLabel(type)
-        node.setAttrByPath('text/text', type)
+        // node.setAttrByPath('text/text', type)
+        node.setData({label: type})
         
         dnd.value?.start(node, e)
 
