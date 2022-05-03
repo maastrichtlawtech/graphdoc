@@ -113,6 +113,7 @@ export const graph_options_defaults: Partial<Options.Manual> = {
 }
 
 export function graph_register_defaults(graph: Graph) {
+    /*
     // https://x6.antv.vision/en/docs/api/registry/edge-tool
     graph.on('edge:mouseenter', ({ cell }) => {
         // console.log(cell)
@@ -122,18 +123,18 @@ export function graph_register_defaults(graph: Graph) {
                     name: 'button-remove',
                     args: {
                         distance: 30,
-                        fill: '#00ff00'
+                        fill: '#000000'
                     },
                 },
             ]
         )
     })
-
     graph.on('edge:mouseleave', ({ cell }) => {
         setTimeout(() => {
             cell.removeTool('button-remove')
         }, 1500)
     })
+    */
 
     graph.on('node:mouseenter', ({ cell }) => {
         cell.addTools([{name: 'button-remove'}])

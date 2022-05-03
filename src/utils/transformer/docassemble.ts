@@ -4,12 +4,16 @@ import { indent } from "@/utils/data/indent"
 
 export class DocassembleTransformer implements ITransformer  {
 
+    // validate_graph_acyclic(graph: Graph, visited: Node[], next: Node) {
+        
+    // }
+
     validate_graph(graph: Graph): string[] {
         const errors = [];
 
-        const node_start = graph.get_nodes_by_type('start')[0];
-        if (typeof node_start === "undefined")
-            errors.push('graph must have one start node')
+        const node_start = graph.get_nodes_by_type('start');
+        if (node_start.length !== 1)
+            errors.push('graph must have exactly one start node')
         const nodes_end = graph.get_nodes_by_type('end');
         if (nodes_end?.length === 0)
             errors.push('graph must have atleast one end node')
@@ -55,6 +59,36 @@ export class DocassembleTransformer implements ITransformer  {
 
             else if (node.type == 'end' && node.get_edges_in().length === 0)
                 errors.push(`end node with label '${node.content}' must have one ingoing edge`)
+        }
+
+        // only perform cycle check if no other errors are present
+        if (errors.length === 0) {
+            // Cycle detection algorithm: https://en.wikipedia.org/wiki/Topological_sorting#Kahn's_algorithm
+
+            const L = [];
+            const S = graph.nodes.filter(x => x.get_edges_in().length === 0);
+
+            let edges = [...graph.edges]
+
+            while (S.length > 0) {
+                const n = S.pop()!;
+                L.push(n);
+
+                for (const e of edges.filter(x => x.node_from_id == n.id)) {
+                    const m = e.get_node_to();
+
+                    edges = edges.filter(x => !(x.id==e.id)) // remove e from edges
+                    if (edges.filter(x => x.node_to_id == m.id).length === 0)
+                        S.push(m)
+                }
+            }
+
+            // console.log("TOPO SORT:", L);
+            // console.log("EDGES:", edges);
+
+            if (edges.length > 0) {
+                errors.push("graph must not contain cycles/loops")
+            }
         }
 
         return errors;
