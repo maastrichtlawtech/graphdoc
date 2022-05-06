@@ -69,6 +69,7 @@ export class DocassembleTransformer implements ITransformer  {
             const S = graph.nodes.filter(x => x.get_edges_in().length === 0);
 
             let edges = [...graph.edges]
+            console.log(edges);
 
             while (S.length > 0) {
                 const n = S.pop()!;

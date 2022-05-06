@@ -2,6 +2,7 @@ import Graph from "../graph";
 import { Graph as AntvGraph } from "@antv/x6";
 import { default_edge_attrs, default_edge_label, default_node_ports, node_types, node_type_default } from "../model";
 import { ITransformer } from ".";
+import { uuid } from "../data/uuid";
 
 export class AntvisTransformer implements ITransformer {
 
@@ -65,7 +66,8 @@ export class AntvisTransformer implements ITransformer {
                 edge_content = null;
 
             const rem_edge = {
-                id: loc_edge.getData()?.edge_id ?? alt_id_i++,
+                // id: loc_edge.getData()?.edge_id ?? alt_id_i++,
+                id: loc_edge.id ?? uuid(),
                 
                 node_from_id: loc_edge.getSourceCellId(),
                 node_to_id:   loc_edge.getTargetCellId(),

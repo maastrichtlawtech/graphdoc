@@ -1,11 +1,8 @@
 import { node_types } from "./model";
-import { v4 as uuidv4 } from 'uuid';
 import { Filter } from "@antv/x6/lib/registry";
+import { uuid } from "./data/uuid";
 
 export type Id = string | number;
-function get_id() {
-    return uuidv4()
-}
 
 export interface Node {
     graph: Graph
@@ -33,7 +30,7 @@ export const NodeDefault = {
 export class Node {
 
     constructor(options: Partial<Node> & Pick<Node, 'graph'>) {
-        options.id = options.id ?? get_id()
+        options.id = options.id ?? uuid()
 
         Object.assign(this, NodeDefault, options);
     }
@@ -96,7 +93,7 @@ export const EdgeDefault = {
 export class Edge {
 
     constructor(options: Partial<Edge> & Pick<Edge, 'graph'>) {
-        options.id = options.id ?? get_id()
+        options.id = options.id ?? uuid()
 
         Object.assign(this, EdgeDefault, options);
     }
