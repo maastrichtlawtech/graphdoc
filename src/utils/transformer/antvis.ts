@@ -95,7 +95,8 @@ export class AntvisTransformer implements ITransformer {
                 // default values (includes ports etc); can be overwritten after spread
                 ...node_types[node.type].antv_metadata,
 
-                id: `node-${node.id}`,
+                // id: `node-${node.id}`,
+                id: node.id,
 
                 x: node.appearance?.x ?? (last_x += 50),
                 y: node.appearance?.y ?? 50,
@@ -145,7 +146,8 @@ export class AntvisTransformer implements ITransformer {
             const edge_ser = {
                 ...default_edge_attrs,
 
-                id: `edge-${edge.id}`,
+                // id: `edge-${edge.id}`,
+                id: edge.id,
 
                 labels: edge_label != null ? [ edge_label ] : [],
 
@@ -164,11 +166,13 @@ export class AntvisTransformer implements ITransformer {
                 */
                 
                 source: {
-                    cell: `node-${edge.node_from_id}`,
+                    // cell: `node-${edge.node_from_id}`,
+                    cell: edge.node_from_id,
                     port: 'out-1'
                 },
                 target: {
-                    cell: `node-${edge.node_to_id}`,
+                    // cell: `node-${edge.node_to_id}`,
+                    cell: edge.node_to_id,
                     port: 'in-1'
                 },
                 data: {
