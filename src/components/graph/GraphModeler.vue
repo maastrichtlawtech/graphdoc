@@ -18,6 +18,7 @@
                 Connect nodes by dragging edges from and to the ports of the nodes.
                 Configure nodes and edges by clicking on their cells and filling in the details in the config sidebar on the right. Nodes and edges can also be removed from this sidebar.
                 If no output is produced, interpret the validation errors presented above the docassemble output window.
+                For an example of a well structured graph, click on 'Load example'.
             </p>
         </div>
     </div>
