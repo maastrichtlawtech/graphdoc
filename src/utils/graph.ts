@@ -2,7 +2,7 @@ import { node_types } from "./model";
 import { v4 as uuidv4 } from 'uuid';
 import { Filter } from "@antv/x6/lib/registry";
 
-export type Id = string;
+export type Id = string | number;
 function get_id() {
     return uuidv4()
 }
@@ -136,11 +136,12 @@ class Graph {
         return this.nodes.filter(x => x.type == type) ?? [];
     }
 
-    add_node(options: Partial<Node>) {
+    // add_node(options: Partial<Node>) {
+    add_node(options: Partial<Node> & Pick<Node, 'id' | 'content' | 'type' | 'appearance'>) {
         this.nodes.push(new Node({...options, graph: this}))
     }
 
-    add_edge(options: Partial<Edge>) {
+    add_edge(options: Partial<Edge> & Pick<Edge, 'id' | 'node_from_id' | 'node_to_id' | 'content'>) {
         this.edges.push(new Edge({...options, graph: this}))
     }
 

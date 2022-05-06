@@ -120,6 +120,7 @@
             docassemble_cont.value = '-';
         
         // docassemble_cont.value = JSON.stringify((new Transformer()).in_antv(graph.value).out_json());
+        // docassemble_cont.value = JSON.stringify(graph.value.toJSON());
     };
     
     const remote_load = (remote_data: any) => {

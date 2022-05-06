@@ -1,6 +1,6 @@
 import Graph from "../graph";
 import { Graph as AntvGraph } from "@antv/x6";
-import { default_edge_label, node_types, node_type_default } from "../model";
+import { default_edge_attrs, default_edge_label, default_node_ports, node_types, node_type_default } from "../model";
 import { ITransformer } from ".";
 
 export class AntvisTransformer implements ITransformer {
@@ -10,14 +10,12 @@ export class AntvisTransformer implements ITransformer {
     in(graph: Graph, antv_graph: AntvGraph): Graph {
         graph.clear();
 
-        // const local_data = this.graph.toJSON();
         const local_data = {
             'nodes': antv_graph.getNodes(),
             'edges': antv_graph.getEdges(),
         };
         
         for(const loc_node of local_data.nodes) {
-            // console.log("loc_node", loc_node);
             
             const node_type = loc_node.getData()?.node_type ?? node_type_default;
 
@@ -50,8 +48,7 @@ export class AntvisTransformer implements ITransformer {
                     }))
                 },
             }
-
-            // this.graph.nodes.push(rem_node)
+            
             graph.add_node(rem_node)
         }
 
@@ -80,12 +77,8 @@ export class AntvisTransformer implements ITransformer {
                 options: {},
             }
 
-            // this.data?.edges.push(rem_edge)
             graph.add_edge(rem_edge)
         }
-
-        // this.data = serialized;
-        // console.log("serialized:", serialized);
 
         return graph;
     }
@@ -99,11 +92,16 @@ export class AntvisTransformer implements ITransformer {
         Object.values(graph.nodes).forEach((node) => {
 
             let node_ser = {
+                // default values (includes ports etc); can be overwritten after spread
+                ...node_types[node.type].antv_metadata,
+
+                id: `node-${node.id}`,
+
                 x: node.appearance?.x ?? (last_x += 50),
                 y: node.appearance?.y ?? 50,
 
-                width: undefined as number | undefined,
-                height: undefined as number | undefined,
+                // width: undefined as number | undefined,
+                // height: undefined as number | undefined,
 
                 // width: node.options?.appearance?.width ?? 100,
                 // height: node.options?.appearance?.height ?? 100,
@@ -111,11 +109,11 @@ export class AntvisTransformer implements ITransformer {
                 // width: node.options?.appearance?.width ?? null,
                 // height: node.options?.appearance?.height ?? null,
 
-                id: `node-${node.id}`,
-                label: node.content,
+                // label: node.content,
                 data: {
                     node_id: node.id,
                     node_type: node.type,
+                    label: node.content,
                     // https://stackoverflow.com/a/62400741 , see reference in serialize fn.
                     // options: Object.fromEntries(Object.entries(node.options).filter(([key, value]) => {
                     //     return !['node_id', 'node_type', 'appearance'].includes(key);
@@ -132,14 +130,9 @@ export class AntvisTransformer implements ITransformer {
 
             // because there are defaults
             if (node_ser.width == null && node.appearance?.width != null)
-            {
                 node_ser.width = node.appearance.width;
-            }
-
             if (node_ser.height == null && node.appearance?.height != null)
-            {
                 node_ser.height = node.appearance.height;
-            }
 
             data_nodes.push(node_ser);
         })
@@ -150,30 +143,39 @@ export class AntvisTransformer implements ITransformer {
             const edge_label = default_edge_label(edge.content);
 
             const edge_ser = {
+                ...default_edge_attrs,
+
                 id: `edge-${edge.id}`,
 
                 labels: edge_label != null ? [ edge_label ] : [],
 
-                shape: 'edge',
+                // shape: 'edge',
                 // https://x6.antv.vision/zh/docs/api/registry/router#orth
                 // router: {
                 //     name: 'orth',
                 // },
+                /*
                 connector: {
                     name: 'jumpover',
                     args: {
                         type: 'arc',
                     },
                 },
+                */
                 
-                source: `node-${edge.node_from_id}`,
-                target: `node-${edge.node_to_id}`,
+                source: {
+                    cell: `node-${edge.node_from_id}`,
+                    port: 'out-1'
+                },
+                target: {
+                    cell: `node-${edge.node_to_id}`,
+                    port: 'in-1'
+                },
                 data: {
                     edge_id: edge.id,
                 },
-            }
 
-            // let edge_label = default_edge_label();
+            }
 
             data_edges.push(edge_ser)
         })

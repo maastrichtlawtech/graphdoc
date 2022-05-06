@@ -2,7 +2,7 @@ import { Graph as AntvGraph } from "@antv/x6";
 import { default as Graph, } from "../graph";
 import { DocassembleTransformer } from "./docassemble";
 import { AntvisTransformer } from "./antvis";
-import { JSONTransformer } from "./json";
+import { JSONGraphData, JSONTransformer } from "./json";
 
 /*
 export type Node = {
@@ -59,7 +59,7 @@ export default class {
 
     // json
 
-    in_json(data: Graph) {
+    in_json(data: JSONGraphData) {
         this.graph = this.json.in_json(this.graph, data);
 
         return this;
@@ -77,9 +77,9 @@ export default class {
         return this;
     }
 
-    // out_antv() {
-    //     return this.antvis.out(this.graph)
-    // }
+    out_antv() {
+        return this.antvis.out(this.graph)
+    }
 
     // docassemble
 

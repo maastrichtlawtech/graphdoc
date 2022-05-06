@@ -20,6 +20,16 @@ export const default_edge_label = (text: string | null = '') => {
     }
 }
 
+export const default_edge_attrs = {
+    // shape: 'dag-edge',
+    attrs: {
+        line: {
+            strokeWidth: '1',
+        },
+    },
+    zIndex: -1,
+}
+
 export const graph_options_defaults: Partial<Options.Manual> = {
     grid: true,
 
@@ -64,19 +74,11 @@ export const graph_options_defaults: Partial<Options.Manual> = {
             return magnet.getAttribute('port-group') !== 'in'
         },
         createEdge(this) {
-            return this.createEdge({
-                // shape: 'dag-edge',
-                attrs: {
-                    line: {
-                        strokeWidth: '1',
-                    },
-                },
-                zIndex: -1,
-            })
+            return this.createEdge(default_edge_attrs)
         },
 
         validateEdge({edge, type, previous}) {
-            console.log("edge data", edge)
+            // console.log("edge data", edge)
             // TODO: only allow (multiple) for decision
             return true;
         },
