@@ -100,7 +100,8 @@ export class DocassembleTransformer implements ITransformer  {
     }
 
     /**
-     * Construct logic in code block for docassemble
+     * Construct python code block for docassemble, from given graph and node
+     * Performs recursive preorder depth-first search
      * @param node The root node to start traversal from
      * @param indent To indent this code relative to indent of current node
      * @returns string[] lines of code
