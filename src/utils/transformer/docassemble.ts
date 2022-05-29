@@ -4,10 +4,6 @@ import { indent } from "@/utils/data/indent"
 
 export class DocassembleTransformer implements ITransformer  {
 
-    // validate_graph_acyclic(graph: Graph, visited: Node[], next: Node) {
-        
-    // }
-
     validate_graph(graph: Graph): string[] {
         const errors = [];
 
@@ -164,16 +160,16 @@ export class DocassembleTransformer implements ITransformer  {
         return code
     }
 
+    /**
+     * Generate the docassemble interview configuration content
+     * @param graph Graph object satisfying the contract in utils/graph.ts
+     *              and has been verified according to the validate_graph() 
+     * @returns string docassemble interview code
+     */
     out(graph: Graph): string {
 
         const node_start = graph.get_nodes_by_type('start')[0];
-        if (typeof node_start === "undefined")
-            return 'no start node'
-        //     throw Error("Graph is missing start node")
         const nodes_end = graph.get_nodes_by_type('end');
-        if (nodes_end?.length === 0)
-            return 'no end node(s)'
-        //     throw Error("Graph is missing atleast one end node")
 
         const blocks: Array<string[] | string> = [];
         
