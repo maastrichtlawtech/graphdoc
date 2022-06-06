@@ -24,8 +24,9 @@ export class AntvisTransformer implements ITransformer {
                 // 'id': loc_node.store.data?.data?.node_id ?? 0,
                 id: loc_node.id,
                 
-                // content: loc_node.attr<string>('text/text') ?? '[no data]',
-                content: loc_node.getData().label ?? '[no data]',
+                // content: loc_node.getData().label ?? '[no data]',
+                variable: loc_node.getData().variable,
+
                 type: node_type,
                 appearance: {
                     x: loc_node.getPosition().x ?? 0,
@@ -36,13 +37,6 @@ export class AntvisTransformer implements ITransformer {
                         ?? node_types[node_type as keyof node_types].antv_metadata.height,
                 },
                 options: {
-                    // TODO: from all data.fields, to raw. TODO in deserialize: opposite
-                    // ALTERNATIVELY (chosen): in deserialize don't load appearance?
-                    // still filter on appearance to prevent collision
-                    // ...Object.fromEntries(
-                    //     Object.entries(loc_node.store?.data).filter(([key, value]) => key === 'appearance') )
-                    // ...loc_node.store?.data?.data?.options ?? {}
-
                     // other method, same as in deserialization
                     ...Object.fromEntries(Object.entries(loc_node.getData()?.options ?? {}).filter(([key, value]) => {
                         return !['node_id', 'appearance'].includes(key);
@@ -116,7 +110,7 @@ export class AntvisTransformer implements ITransformer {
                 data: {
                     node_id: node.id,
                     node_type: node.type,
-                    label: node.content,
+                    label: node.variable,
                     // https://stackoverflow.com/a/62400741 , see reference in serialize fn.
                     // options: Object.fromEntries(Object.entries(node.options).filter(([key, value]) => {
                     //     return !['node_id', 'node_type', 'appearance'].includes(key);

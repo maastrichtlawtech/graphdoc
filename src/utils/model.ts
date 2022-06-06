@@ -217,6 +217,7 @@ export type node_types = {
 };
 export const node_type_default = 'notice';
 
+/*
 Graph.registerNode("vue-start", {
     inherit: "vue-shape",
     // x: 200,
@@ -236,16 +237,16 @@ Graph.registerNode("vue-start", {
         }
     },
 });
+*/
 
-
-import start from '@/components/graph/nodes/start.vue'
+// import start from '@/components/graph/nodes/stfart.vue'
 
 const node_html = {
     render(node: Node) {
         const data = node.getData() as any
         return(
             `<div class="node node-${ data.node_type }">
-                <span>${ data.label ?? '' }</span>
+                <span>${ data.variable ?? '' }</span>
             </div>`
         )
     },

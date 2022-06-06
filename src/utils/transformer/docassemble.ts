@@ -92,7 +92,7 @@ export class DocassembleTransformer implements ITransformer  {
     }
     
     da_node_get_id(node: Node): string {
-        return `${ node.type }_${ node.id.toString().split('-')[0] }`
+        return `${ node.type }_${ node.variable }`
     }
 
     /**

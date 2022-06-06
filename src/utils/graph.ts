@@ -9,7 +9,11 @@ export interface Node {
     id: Id,
 
     type: keyof node_types,
+
+    variable: string,
     content: string,
+    // content: {[lang: string]: string}, // for multilang support
+    
     options: {[key: string]: any},
     appearance: {
         x: number, y: number,
@@ -30,7 +34,9 @@ export const NodeDefault = {
 export class Node {
 
     constructor(options: Partial<Node> & Pick<Node, 'graph'>) {
-        options.id = options.id ?? uuid()
+        if (typeof options.id == "undefined")
+            options.id = uuid();
+        // options.variable = `${options.id}`;
 
         Object.assign(this, NodeDefault, options);
     }
