@@ -43,4 +43,9 @@ npm install
 npm run build
 ```
 
-The built package is located at `./dist`. This folder can be opened in a webbrowser, or served using a webserver.
+The built package is located at `./dist`. This folder can be served using any webserver, like [http-server](https://www.npmjs.com/package/http-server)
+```
+npx http-server dist
+```
+
+Alternatively, the index.html file in the dist folder can be opened using a webbrowser from the file explorer.
