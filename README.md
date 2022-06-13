@@ -29,7 +29,7 @@ docker run graphdoc --name graphdoc -p 80:80
 
 ### Manual installation
 
-To manually install GraphDoc, you are required to have atleast npm. It does not require a webserver, however this is recommended.
+To manually install GraphDoc, you are required to have atleast npm installed. It does not require a webserver, however this is recommended.
 
 First clone the repositry and navigate with the command line to the destination folder.
 ```
@@ -43,9 +43,9 @@ npm install
 npm run build
 ```
 
-The built package is located at `./dist`. This folder can be served using any webserver, like [http-server](https://www.npmjs.com/package/http-server)
+The built package is located at `./dist`. This folder can be served using any webserver, like [http-server](https://www.npmjs.com/package/http-server):
 ```
 npx http-server dist
 ```
 
-Alternatively, the index.html file in the dist folder can be opened using a webbrowser from the file explorer.
+Alternatively, the index.html file in the dist folder (`dist/index.html`) can be opened using a webbrowser from the file explorer.
