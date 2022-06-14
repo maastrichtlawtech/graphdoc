@@ -1,8 +1,16 @@
 # GraphDoc
 
+## Introduction
+
 GraphDoc is a web-application that has been developed on behalf of the [Maastricht Law & Tech Lab](https://github.com/maastrichtlawtech/), which is part of Maastricht University in The Netherlands.
 
 The goal of this application is to aid users in visually constructing Docassemble interview configuration files.
+
+## Screenshots
+
+User Interface | Docassemble
+-- | --
+![UI](https://user-images.githubusercontent.com/50321538/173640178-b5ac3958-e982-467e-8d93-7e48d81bb81c.png) | ![afbeelding](https://user-images.githubusercontent.com/50321538/173640275-d485c7cb-06a4-4eae-93a6-0aa080d208a5.png)
 
 ## Usage         
 
