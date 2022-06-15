@@ -2,63 +2,81 @@ import { ITransformer } from ".";
 import Graph, { Node } from "../graph";
 import { indent } from "@/utils/data/indent"
 
+export type validationErrorList = {node: {[id: string]: string[]}, edge: {[id: string]: string[]}, general: string[]};
+
 export class DocassembleTransformer implements ITransformer  {
 
-    validate_graph(graph: Graph): string[] {
-        const errors = [];
+    validate_graph(graph: Graph): validationErrorList {
+        const errors: validationErrorList = {node: {}, edge: {}, general: []};
 
         const node_start = graph.get_nodes_by_type('start');
         if (node_start.length !== 1)
-            errors.push('graph must have exactly one start node')
+            errors.general.push('graph must have exactly one start node')
         const nodes_end = graph.get_nodes_by_type('end');
         if (nodes_end?.length === 0)
-            errors.push('graph must have atleast one end node')
+            errors.general.push('graph must have atleast one end node')
 
         const nodes_decision = graph.get_nodes_by_type('decision');
         for(const node_decision of nodes_decision) {
             let has_edge_out_content_null = false;
-            const content_edges_out = [];
 
-            for (const edge_out of node_decision.get_edges_out()) {
+            const content_edges_out: {[content: string]: number} = {};
+            const node_edges_out = node_decision.get_edges_out();
+
+            for (const edge_out of node_edges_out) {
                 if (edge_out.content == null)
                     has_edge_out_content_null = true;
                 
                 // if length == 1, to ensure it's only printed once
-                if (content_edges_out.filter(x => x == edge_out.content).length == 1)
-                    errors.push(`decision node with label '${node_decision.content}' has multiple edges with content '${ edge_out.content }' (should be unique)`)
+                // if (content_edges_out.filter(x => x == edge_out.content).length == 1)
+                //     errors.push(`decision node with label '${node_decision.content}' has multiple edges with content '${ edge_out.content }' (should be unique)`)
                 
-                if (edge_out.content != null)
-                    content_edges_out.push(edge_out.content)
+                if (edge_out.content != null){
+                    // https://stackoverflow.com/a/39591024
+                    content_edges_out[edge_out.content] = (content_edges_out[edge_out.content]+1) || 1 ;
+                }
             }
             
             if (has_edge_out_content_null)
-                errors.push(`decision node with label '${node_decision.content}' has atleast one outgoing edge with no content`)
+                errors.node[node_decision.id].push(`decision node with label '${node_decision.content}' has atleast one outgoing edge with no content`)
+
+            Object.keys(content_edges_out).forEach((content, amount) => {
+                if (amount > 1) {
+                    node_edges_out.filter(edge => edge.content = content).forEach(edge => {
+                        // errors.push(`decision node with label '${ node_decision.content }' has multiple edges with content '${ edge_out.content }' (should be unique)`)
+                        errors.edge[edge.id].push(`multiple edges with content '${ edge.content }' exist on the decision node '${ node_decision.get_label() }'`)
+                    })
+                }
+            });
         }
 
         for (const node of graph.nodes) {
             // if (node.type == 'start' && node.get_edges_in().length > 0)
             //     errors.push(`start node with label ${node.content} must have no ingoing edges`) // impossible (?)
             if (node.type == 'start' && node.get_edges_out().length !== 1)
-                errors.push(`start node with label '${node.content}' must have one outgoing edge`)
+                errors.node[node.id].push(`start node with label '${node.content}' must have one outgoing edge`)
 
             // else if (node.type == 'decision' && node.get_edges_out().length === 1)
             //     errors.push(`decision node with label ${node.content} has one outgoing edge, which makes it purpose trivial`) // recommendation
             else if (node.type == 'decision' && node.get_edges_in().length === 0)
-                errors.push(`decision node with label '${node.content}' must have atleast one ingoing edge`)
+                errors.node[node.id].push(`decision node with label '${node.content}' must have atleast one ingoing edge`)
             else if (node.type == 'decision' && node.get_edges_out().length === 0)
-                errors.push(`decision node with label '${node.content}' must have atleast one outgoing edge`)
+                errors.node[node.id].push(`decision node with label '${node.content}' must have atleast one outgoing edge`)
 
             else if (node.type == 'notice' && node.get_edges_in().length === 0)
-                errors.push(`notice node with label '${node.content}' must have atleast one ingoing edge`)
+                errors.node[node.id].push(`notice node with label '${node.content}' must have atleast one ingoing edge`)
             else if (node.type == 'notice' && node.get_edges_out().length !== 1)
-                errors.push(`notice node with label '${node.content}' must have one outgoing edge`)
+                errors.node[node.id].push(`notice node with label '${node.content}' must have one outgoing edge`)
 
             else if (node.type == 'end' && node.get_edges_in().length === 0)
-                errors.push(`end node with label '${node.content}' must have one ingoing edge`)
+                errors.node[node.id].push(`end node with label '${node.content}' must have one ingoing edge`)
         }
 
         // only perform cycle check if no other errors are present
-        if (errors.length === 0) {
+        if (errors.general.length === 0 && 
+            Object.keys(errors.node).length === 0 && 
+            Object.keys(errors.edge).length === 0) {
+            
             // Cycle detection algorithm: https://en.wikipedia.org/wiki/Topological_sorting#Kahn's_algorithm
 
             const L = [];
@@ -84,7 +102,7 @@ export class DocassembleTransformer implements ITransformer  {
             // console.log("EDGES:", edges);
 
             if (edges.length > 0) {
-                errors.push("graph must not contain cycles/loops")
+                errors.general.push("graph must not contain cycles/loops")
             }
         }
 

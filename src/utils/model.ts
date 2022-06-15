@@ -153,7 +153,7 @@ export function graph_register_defaults(graph: Graph) {
     Graph.registerConnector('algo-connector', (s, e) => {
         const offset = 4
         const deltaY = Math.abs(e.y - s.y)
-        const control = Math.floor((deltaY / 3) * 2)
+    const control = Math.floor((deltaY / 3) * 2)
     
         const v1 = { x: s.x, y: s.y + offset + control }
         const v2 = { x: e.x, y: e.y - offset - control }

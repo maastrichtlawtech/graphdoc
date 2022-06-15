@@ -2,7 +2,8 @@ import { node_types } from "./model";
 import { Filter } from "@antv/x6/lib/registry";
 import { uuid } from "./data/uuid";
 
-export type Id = string | number;
+// export type Id = string | number;
+export type Id = string;
 
 export interface Node {
     graph: Graph
@@ -50,6 +51,10 @@ export class Node {
     }
     */
 
+    get_label() {
+        return this.variable ?? this.content ?? this.id;
+    }
+ 
     get_edges_in() {
         return this.graph.edges
             .filter(edge => edge.node_to_id == this.id)
