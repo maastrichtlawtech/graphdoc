@@ -92,7 +92,8 @@ export class DocassembleTransformer implements ITransformer  {
     }
     
     da_node_get_id(node: Node): string {
-        return `${ node.type }_${ node.variable }`
+        // return `${ node.type }_${ node.variable }`
+        return `${ node.variable ?? node.id.toString().substring(0, 8) }`
     }
 
     /**

@@ -20,18 +20,26 @@
                     <span class="my-2 block border-b border-gray-300 uppercase font-bold text-sm text-gray-800">{{ field_group }}</span>
 
                     <div v-for="field in fields" :key="field" class="block mt-2 mb-1 ">
+                    
+                        <label v-if="field == 'variable'">
+                            <span class="text-gray-700 block mb-1">Variable</span>
+                            <div>
+                                <input class="w-full" type="text" v-model="node_variable" />
+                            </div>
+                        </label>
+
                         <label v-if="field == 'label'">
-                            <span class="text-gray-700 block mb-1">Label</span>
-                            <!-- <input class="w-full" type="text" v-model="cell.label" /> -->
+                            <span class="text-gray-700 block mb-1">Content</span>
                             <div>
                                 <textarea 
                                     style="min-height: 3rem;"
                                     class="w-full"
                                     type="text"
-                                    v-model="node_label" 
+                                    v-model="node_content" 
                                 />
                             </div>
                         </label>
+
                         <!-- 
                         <label v-else-if="field == 'annotation'">
                             <span class="text-gray-700 block mb-1">Annotation</span>
@@ -39,10 +47,10 @@
                             <textarea style="min-height: 3rem;" class="w-full" type="text" v-model="cell.store.data.data.options.annotation" />
                         </label>
                         -->
-
+                        <!--
                         <span v-else>
                             <span class="text-gray-700 block mb-1">Undefined field: {{ field.charAt(0).toUpperCase() + field.slice(1) }}</span>
-                        </span>
+                        </span> -->
                     </div>
                 </div>
             </div>
@@ -68,7 +76,7 @@
                         <input
                             type="text"
                             class="w-full"
-                            :value="edge_get_label(cell)" 
+                            :value="edge_get_label()" 
                             @input="event => edge_set_label((event.target as HTMLInputElement).value)" />
                     </label>
                 </div>
@@ -127,17 +135,26 @@
         )
     });
 
-    const node_label = computed({
+    const node_content = computed({
         get() {
             // https://github.com/antvis/X6/issues/2020#issuecomment-1104644438
             // return (props.cell as Node).getAttrByPath('text/text') as string
 
-            return (props.cell as Node).getData().label ?? '';
+            return (props.cell as Node).getData().content ?? '';
         },
         set(value: string) {
             // (props.cell as Node).setAttrByPath('text/text', value)
 
-            (props.cell as Node).setData({label: value});
+            (props.cell as Node).setData({content: value});
+        }
+    });
+
+    const node_variable = computed({
+        get() {
+            return (props.cell as Node).getData().variable ?? '';
+        },
+        set(value: string) {
+            (props.cell as Node).setData({variable: value != '' ? value : null});
         }
     });
 

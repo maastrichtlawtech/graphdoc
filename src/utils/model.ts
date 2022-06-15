@@ -1,6 +1,8 @@
 
-import { Cell, Graph, Node, Path } from '@antv/x6';
+import { Cell, Graph, Node as AntvNode, Path } from '@antv/x6';
 import { Options } from '@antv/x6/lib/graph/options';
+
+import { Node } from './graph';
 
 import '@antv/x6-vue-shape'
 
@@ -208,7 +210,7 @@ export type node_types = {
     [
         key in "start" | "notice" | "decision" | "end"
     ]: {
-        antv_metadata: Node.Metadata,
+        antv_metadata: Omit<AntvNode.Metadata, 'data'> & {data: Partial<AntvNodeData>}, // override 'data' type of antv
         config_fields: {
             general?: string[],
             additional?: string[]
@@ -241,16 +243,34 @@ Graph.registerNode("vue-start", {
 
 // import start from '@/components/graph/nodes/stfart.vue'
 
+// export type AntvNodeData = Partial<Node> & Pick<Node, 'type' | 'options' | 'variable' | 'content'>;
+export type AntvNodeData = Pick<Node, 'type' | 'options' | 'variable' | 'content'>;
+
 const node_html = {
-    render(node: Node) {
-        const data = node.getData() as any
+    render(node: AntvNode) {
+        const data = node.getData() as AntvNodeData;
+
+        let label = '';
+        let label_class = '';
+
+        if (data.variable) {
+            label = data.variable;
+            label_class = 'node-label-variable';
+        } else if (data.content) {
+            label = data.content;
+            label_class = 'node-label-content';
+        } else {
+            label =  `unnamed ${data.type} node`;
+            label_class = 'node-label-unnamed';
+        }
+
         return(
-            `<div class="node node-${ data.node_type }">
-                <span>${ data.variable ?? '' }</span>
+            `<div class="node node-${ data.type }">
+                <span class="${ label_class }">${ label }</span>
             </div>`
         )
     },
-    shouldComponentUpdate(node: Node) {
+    shouldComponentUpdate(node: AntvNode) {
         return node.hasChanged('data')
     },
 }
@@ -265,14 +285,15 @@ export const node_types: node_types = {
             width: 180,
             height: 36,
             data: {
-                node_type: 'start',
-                options: {}
+                type: 'start',
+                options: {},
             },
             ports: default_node_ports(['out']),
         },
         config_fields: {
             general: [
-                'label'
+                'variable',
+                'label',
             ],
             additional: [
                 // 'annotation'
@@ -288,14 +309,15 @@ export const node_types: node_types = {
             height: 36,
 
             data: {
-                node_type: 'decision',
+                type: 'decision',
                 options: {}
             },
             ports: default_node_ports(['in', 'out']),
         },
         config_fields: {
             general: [
-                'label'
+                'variable',
+                'label',
             ],
             additional: [
                 // 'annotation',
@@ -312,14 +334,15 @@ export const node_types: node_types = {
             height: 36,
             
             data: {
-                node_type: 'notice',
+                type: 'notice',
                 options: {}
             },
             ports: default_node_ports(['in', 'out']),
         },
         config_fields: {
             general: [
-                'label'
+                'variable',
+                'label',
             ],
             additional: [
                 // 'annotation'
@@ -335,19 +358,19 @@ export const node_types: node_types = {
             height: 36,
             
             data: {
-                node_type: 'end',
+                type: 'end',
                 options: {}
             },
             ports: default_node_ports(['in']),
         },
         config_fields: {
             general: [
-                'label'
+                'variable',
+                'label',
             ],
         }
     }
 }
-
 
 /*
 export const node_types: node_types = {

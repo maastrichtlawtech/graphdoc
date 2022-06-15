@@ -42,6 +42,19 @@ html {
     &.node-end {
         border-bottom: 4px solid $node_end_color;
     }
+
+    span {
+        &.node-label-variable {
+            @apply font-mono;
+        }
+        &.node-label-content {
+            // ...
+        }
+        &.node-label-unnamed {
+            font-style: italic;
+            color:rgb(108, 108, 108);
+        }
+    }
 }
 
 .x6-cell {

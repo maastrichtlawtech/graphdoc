@@ -1,6 +1,6 @@
 import Graph from "../graph";
 import { Graph as AntvGraph } from "@antv/x6";
-import { default_edge_attrs, default_edge_label, default_node_ports, node_types, node_type_default } from "../model";
+import { AntvNodeData, default_edge_attrs, default_edge_label, default_node_ports, node_types, node_type_default } from "../model";
 import { ITransformer } from ".";
 import { uuid } from "../data/uuid";
 
@@ -17,31 +17,28 @@ export class AntvisTransformer implements ITransformer {
         };
         
         for(const loc_node of local_data.nodes) {
-            
-            const node_type = loc_node.getData()?.node_type ?? node_type_default;
+            const loc_node_data = loc_node.getData() as AntvNodeData
+            // const node_type = loc_node.getData()?.node_type ?? node_type_default;
 
             const rem_node = {
                 // 'id': loc_node.store.data?.data?.node_id ?? 0,
                 id: loc_node.id,
                 
                 // content: loc_node.getData().label ?? '[no data]',
-                variable: loc_node.getData().variable,
+                variable: loc_node_data.variable,
+                content: loc_node_data.content,
 
-                type: node_type,
+                type: loc_node_data.type,
+                options: loc_node_data.options ?? {},
+
                 appearance: {
                     x: loc_node.getPosition().x ?? 0,
                     y: loc_node.getPosition().y ?? 0,
                     width: loc_node.getSize().width
-                        ?? node_types[node_type as keyof node_types].antv_metadata.width,
+                        ?? node_types[loc_node_data.type].antv_metadata.width,
                     height: loc_node.getSize().height 
-                        ?? node_types[node_type as keyof node_types].antv_metadata.height,
-                },
-                options: {
-                    // other method, same as in deserialization
-                    ...Object.fromEntries(Object.entries(loc_node.getData()?.options ?? {}).filter(([key, value]) => {
-                        return !['node_id', 'appearance'].includes(key);
-                    }))
-                },
+                        ?? node_types[loc_node_data.type].antv_metadata.height,
+                }
             }
             
             graph.add_node(rem_node)
@@ -79,7 +76,12 @@ export class AntvisTransformer implements ITransformer {
         return graph;
     }
 
+    out(graph: Graph) {
+        return;
+    }
+
     // inspired from: https://github.com/eensander/graph-quiz/blob/master/resources/js/components/dashboard/graph/GraphModeler.vue#L525
+    /*
     out(graph: Graph) {
 
         const data_nodes: Array<any> = [];
@@ -152,14 +154,13 @@ export class AntvisTransformer implements ITransformer {
                 // router: {
                 //     name: 'orth',
                 // },
-                /*
-                connector: {
-                    name: 'jumpover',
-                    args: {
-                        type: 'arc',
-                    },
-                },
-                */
+                
+                // connector: {
+                //     name: 'jumpover',
+                //     args: {
+                //         type: 'arc',
+                //     },
+                // },
                 
                 source: {
                     // cell: `node-${edge.node_from_id}`,
@@ -190,4 +191,5 @@ export class AntvisTransformer implements ITransformer {
 
         return data;
     }
+    */
 }
