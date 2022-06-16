@@ -9,7 +9,7 @@
     <div v-else-if="cell.isNode()" class="w-full">
     
         <div class="">
-            <span class="m-2 font-bold block text-2xl border-b border-gray-300">Node: {{ (cell as any).store.data.data.node_type }}</span>
+            <span class="m-2 font-bold block text-2xl border-b border-gray-300">{{ titleCase((cell.data as AntvNodeData).type) }} node</span>
             
             <div class="p-2">
                 <button @click="cell?.remove()" class="action-btn-remove">Remove</button>
@@ -95,10 +95,12 @@
 <script lang="ts" setup>
 
     import { computed, onMounted, ref } from 'vue';
-    import { default_edge_label, node_types, node_type_default } from '@/utils/model'
+    import { default_edge_label, node_types, node_type_default, AntvNodeData } from '@/utils/model'
 
     import { Cell, Edge, Node } from '@antv/x6'
 
+    import titleCase from '@/utils/data/titleCase';
+    
     // const props = defineProps({
     //     cell: {
     //         type: Cell,

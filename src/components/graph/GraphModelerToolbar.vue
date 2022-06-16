@@ -19,6 +19,10 @@
             <button :disabled="typeof graph === 'undefined'" @click="item_redo()">Redo</button>
         </div>
         
+        <div class="toolbar-item">
+            <button :disabled="typeof graph === 'undefined'" @click="item_clear()">Clear</button>
+        </div>
+        
         <!-- <div class="toolbar-item">
             <button :disabled="typeof graph === 'undefined'" @click="item_regenerate_docassemble()">Regenerate output</button>
         </div> -->
@@ -42,11 +46,12 @@
     const props = defineProps({
         graph: {
             type: Graph,
-            required: false,
         },
         docassemble_cont_update: {
             type: Function,
-            required: false,
+        },
+        init_modeler: {
+            type: Function,
         }
     })
 
@@ -83,6 +88,17 @@
     
     const item_redo = () => {
         props.graph?.redo();
+    }
+
+    const item_clear = () => {
+        // if (typeof props.init_modeler !== "undefined" && confirm("Are you sure you want to reset your workspace?")){
+        //     props.init_modeler();
+        // }
+
+        if (confirm("Are you sure you want to reset your workspace?")) {
+            props.graph?.removeCells(props.graph.getCells()); 
+            // TODO: set view to original state
+        }
     }
 
 </script>

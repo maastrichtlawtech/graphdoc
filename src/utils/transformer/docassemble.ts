@@ -1,20 +1,24 @@
 import { ITransformer } from ".";
-import Graph, { Node } from "../graph";
+import Graph, { Edge, Node } from "../graph";
 import { indent } from "@/utils/data/indent"
 
-export type validationErrorList = {node: {[id: string]: string[]}, edge: {[id: string]: string[]}, general: string[]};
+// export type validationErrorList = {node: {[id: string]: string[]}, edge: {[id: string]: string[]}, general: string[]};
+
+export type validationErrorPart = string | Node | Edge;
+export type validationErrorList = Array<validationErrorPart>[];
 
 export class DocassembleTransformer implements ITransformer  {
 
     validate_graph(graph: Graph): validationErrorList {
-        const errors: validationErrorList = {node: {}, edge: {}, general: []};
+        // const errors: validationErrorList = {node: {}, edge: {}, general: []};
+        const errors: validationErrorList = [];
 
         const node_start = graph.get_nodes_by_type('start');
         if (node_start.length !== 1)
-            errors.general.push('graph must have exactly one start node')
+            errors.push(['graph must have exactly one start node'])
         const nodes_end = graph.get_nodes_by_type('end');
         if (nodes_end?.length === 0)
-            errors.general.push('graph must have atleast one end node')
+            errors.push(['graph must have atleast one end node'])
 
         const nodes_decision = graph.get_nodes_by_type('decision');
         for(const node_decision of nodes_decision) {
@@ -38,14 +42,26 @@ export class DocassembleTransformer implements ITransformer  {
             }
             
             if (has_edge_out_content_null)
-                errors.node[node_decision.id].push(`decision node with label '${node_decision.content}' has atleast one outgoing edge with no content`)
-
-            Object.keys(content_edges_out).forEach((content, amount) => {
+                errors.push(['decision node ', node_decision, ' has atleast one outgoing edge with no content']);
+            
+            console.log(content_edges_out);
+            Object.entries(content_edges_out).forEach(([content, amount]) => {
+                
                 if (amount > 1) {
-                    node_edges_out.filter(edge => edge.content = content).forEach(edge => {
-                        // errors.push(`decision node with label '${ node_decision.content }' has multiple edges with content '${ edge_out.content }' (should be unique)`)
-                        errors.edge[edge.id].push(`multiple edges with content '${ edge.content }' exist on the decision node '${ node_decision.get_label() }'`)
-                    })
+                    // node_edges_out.filter(edge => edge.content = content).forEach(edge => {
+                    //     // errors.push(`decision node with label '${ node_decision.content }' has multiple edges with content '${ edge_out.content }' (should be unique)`)
+                    //     errors.push([`multiple edges with content '${ edge.content }' exist on the decision node `, node_decision])
+                    // })
+                    const edges = node_edges_out.filter(edge => edge.content = content);
+                    const error_start: validationErrorPart[] = [
+                        `the decision node `, 
+                        node_decision, 
+                        ` has multiple edges with content '${ edges[0].content }'`,
+                        'on the edges: '
+                    ];
+                    edges.forEach((tmp_edge) => { error_start.push(tmp_edge, ', ') })
+
+                    errors.push(error_start)
                 }
             });
         }
@@ -54,28 +70,28 @@ export class DocassembleTransformer implements ITransformer  {
             // if (node.type == 'start' && node.get_edges_in().length > 0)
             //     errors.push(`start node with label ${node.content} must have no ingoing edges`) // impossible (?)
             if (node.type == 'start' && node.get_edges_out().length !== 1)
-                errors.node[node.id].push(`start node with label '${node.content}' must have one outgoing edge`)
+                errors.push(['start node ', node, ' must have one outgoing edge'])
 
             // else if (node.type == 'decision' && node.get_edges_out().length === 1)
             //     errors.push(`decision node with label ${node.content} has one outgoing edge, which makes it purpose trivial`) // recommendation
             else if (node.type == 'decision' && node.get_edges_in().length === 0)
-                errors.node[node.id].push(`decision node with label '${node.content}' must have atleast one ingoing edge`)
+                errors.push(['decision node ', node, ' must have atleast one ingoing edge'])
             else if (node.type == 'decision' && node.get_edges_out().length === 0)
-                errors.node[node.id].push(`decision node with label '${node.content}' must have atleast one outgoing edge`)
+                errors.push(['decision node ', node, ' must have atleast one outgoing edge'])
 
             else if (node.type == 'notice' && node.get_edges_in().length === 0)
-                errors.node[node.id].push(`notice node with label '${node.content}' must have atleast one ingoing edge`)
+                errors.push(['notice node ', node, ' must have atleast one ingoing edge'])
             else if (node.type == 'notice' && node.get_edges_out().length !== 1)
-                errors.node[node.id].push(`notice node with label '${node.content}' must have one outgoing edge`)
+                errors.push(['notice node ', node, ' must have one outgoing edge'])
 
-            else if (node.type == 'end' && node.get_edges_in().length === 0)
-                errors.node[node.id].push(`end node with label '${node.content}' must have one ingoing edge`)
+            else if (node.type == 'end' && node.get_edges_in().length === 0){
+                console.log("NODE", node)
+                errors.push(['end node ', node, ' must have one ingoing edge'])
+            }
         }
 
         // only perform cycle check if no other errors are present
-        if (errors.general.length === 0 && 
-            Object.keys(errors.node).length === 0 && 
-            Object.keys(errors.edge).length === 0) {
+        if (errors.length === 0) {
             
             // Cycle detection algorithm: https://en.wikipedia.org/wiki/Topological_sorting#Kahn's_algorithm
 
@@ -102,7 +118,7 @@ export class DocassembleTransformer implements ITransformer  {
             // console.log("EDGES:", edges);
 
             if (edges.length > 0) {
-                errors.general.push("graph must not contain cycles/loops")
+                errors.push(['graph must not contain cycles/loops'])
             }
         }
 
@@ -111,7 +127,7 @@ export class DocassembleTransformer implements ITransformer  {
     
     da_node_get_id(node: Node): string {
         // return `${ node.type }_${ node.variable }`
-        return `${ node.variable ?? node.id.toString().substring(0, 8) }`
+        return `${ node.variable ?? `${ node.type }_${node.id.toString().substring(0, 8)}` }`;
     }
 
     /**
@@ -198,7 +214,7 @@ export class DocassembleTransformer implements ITransformer  {
                 case 'start':
                     blocks.push([
                         'question: Start',
-                        `subquestion: ${ node.content }`,
+                        `subquestion: ${ node.get_content() }`,
                         `continue button field: ${ this.da_node_get_id(node) }`,
                     ]);
 
@@ -222,7 +238,7 @@ export class DocassembleTransformer implements ITransformer  {
 
                     blocks.push([
                         'question: Question',
-                        `subquestion: ${ node.content }`,
+                        `subquestion: ${ node.get_content() }`,
                         `field: ${ this.da_node_get_id(node) }`,
                         ...buttons
                     ]);
@@ -232,7 +248,7 @@ export class DocassembleTransformer implements ITransformer  {
                 case 'notice': {
                     blocks.push([
                         'question: Notice',
-                        `subquestion: ${ node.content }`,
+                        `subquestion: ${ node.get_content() }`,
                         `continue button field: ${ this.da_node_get_id(node) }`,
                     ]);
 
@@ -244,7 +260,7 @@ export class DocassembleTransformer implements ITransformer  {
         const logic_code: string[] = [];
         for (const node_end of nodes_end ?? [])
             // adding declarations to end nodes content
-            logic_code.push(...indent([`${this.da_node_get_id(node_end)} = '${node_end.content}'`]))
+            logic_code.push(...indent([`${this.da_node_get_id(node_end)} = '${node_end.get_content()}'`]))
 
         logic_code.push(...indent(this.da_build_logic(graph, node_start)));
 

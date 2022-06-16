@@ -51,8 +51,16 @@ export class Node {
     }
     */
 
+    // not sure if this is the best method
+    is_node() { return true; }
+    is_edge() { return false; }
+
     get_label() {
-        return this.variable ?? this.content ?? this.id;
+        return this.variable ?? this.content ?? this.id.substring(0, 8);
+    }
+    
+    get_content() {
+        return this.content ?? `<content of node ${ this.id.substring(0, 8) }>`
     }
  
     get_edges_in() {
@@ -119,6 +127,10 @@ export class Edge {
         this.content = content;
     }
 */
+
+    is_node() { return false; }
+    is_edge() { return true; }
+
     get_node_from() {
         return this.graph.nodes
             .filter(node => node.id == this.node_from_id)[0]

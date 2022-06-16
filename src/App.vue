@@ -8,16 +8,13 @@
 import { defineComponent } from 'vue';
 // import GraphModeler from './components/GraphModeler.vue';
 import GraphEditorComponent from './components/graph/GraphEditorComponent.vue';
+import Test from './components/Test.vue';
 </script>
 
 <style lang="scss">
 #app {
-    // font-family: Avenir, Helvetica, Arial, sans-serif;
-    // -webkit-font-smoothing: antialiased;
-    // -moz-osx-font-smoothing: grayscale;
-    // text-align: center;
-    // color: #2c3e50;
-    margin-top: 60px;
+    margin: 1rem;
+    margin-top: 30px;
 }
 
 </style>
