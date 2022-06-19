@@ -15,10 +15,10 @@ export class DocassembleTransformer implements ITransformer  {
 
         const node_start = graph.get_nodes_by_type('start');
         if (node_start.length !== 1)
-            errors.push(['graph must have exactly one start node'])
+            errors.push([`graph must have exactly one start node (has ${node_start.length})`]);
         const nodes_end = graph.get_nodes_by_type('end');
-        if (nodes_end?.length === 0)
-            errors.push(['graph must have atleast one end node'])
+        if (nodes_end.length === 0)
+            errors.push([`graph must have atleast one end node`])
 
         const nodes_decision = graph.get_nodes_by_type('decision');
         for(const node_decision of nodes_decision) {
