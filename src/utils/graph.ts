@@ -60,7 +60,7 @@ export class Node {
     }
     
     get_content() {
-        return this.content ?? `<content of node ${ this.id.substring(0, 8) }>`
+        return this.content ?? `[content of node ${ this.id.substring(0, 8) }]`
     }
  
     get_edges_in() {
@@ -99,14 +99,8 @@ export interface Edge {
     content: string | null,
 }
 
-export const EdgeDefault = {
-    appearance: {
-        x: 0, y: 0,
-        width: 100, height: 100
-    },
-    options: {},
-    content: '<empty>',
-    type: 'notice'
+export const EdgeDefault: Partial<Edge> = {
+    content: null,
 }
 
 export class Edge {

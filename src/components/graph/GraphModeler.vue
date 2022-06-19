@@ -49,7 +49,10 @@
     <GraphValidationErrors :formatted_validation_errors="formatted_validation_errors" />
     
     <div class="my-4">
-        <span>Docassemble out:</span>
+        <span class="text-lg block mb-1">Docassemble interview output</span>
+        <label class="text-sm text-gray-700">
+            <input type="checkbox" class="mr-1" v-model="docassemble_out_options.include_json_export" /> Include a copy of the model
+        </label>
         <div class="relative">
             <div class="w-full min-h-4 font-mono border rounded p-2 mt-1 whitespace-pre-wrap" id="docassemble_out_container">
                 {{ docassemble_cont }}
@@ -103,6 +106,15 @@
     const docassemble_validation_errors: Ref<validationErrorList> = ref([]);
     const formatted_validation_errors: Ref<(string | VNode)[][]> = ref([]);
     const docassemble_cont: Ref<string> = ref('');
+
+    const docassemble_out_options = reactive({
+        include_json_export: true,
+    });
+
+    watch(() => docassemble_out_options, (val => {
+        console.log("options updated")
+        docassemble_cont_update();
+    }), { deep: true })
 
     // type NotFunction<T> = T extends Node | Edge ? never : T;
 
@@ -168,10 +180,19 @@
 
         // console.log(formatted_validation_errors.value)
 
-        if(formatted_validation_errors.value.length == 0)
-            docassemble_cont.value = (new Transformer()).in_antv(graph.value).out_docassemble();
-        else
+        // const transformer = new Transformer()).in_antv(graph.value);
+
+        if(formatted_validation_errors.value.length == 0) {
+            docassemble_cont.value = transformer.out_docassemble()
+            if (docassemble_cont.value && docassemble_out_options.include_json_export) {
+                docassemble_cont.value = docassemble_cont.value
+                    .concat("\n---\n# [START INLINE GRAPHDOC EXPORT]")
+                    .concat("\n# ").concat(JSON.stringify(transformer.out_json()))
+                    .concat("\n# [END INLINE GRAPHDOC EXPORT]");
+            }
+        } else {
             docassemble_cont.value = '-';
+        }
         
         // docassemble_cont.value = JSON.stringify((new Transformer()).in_antv(graph.value).out_json());
         // docassemble_cont.value = JSON.stringify(graph.value.toJSON());

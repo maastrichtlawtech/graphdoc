@@ -76,12 +76,12 @@ export class AntvisTransformer implements ITransformer {
         return graph;
     }
 
-    out(graph: Graph) {
-        return;
-    }
+    // out(graph: Graph) {
+    //     return;
+    // }
 
     // inspired from: https://github.com/eensander/graph-quiz/blob/master/resources/js/components/dashboard/graph/GraphModeler.vue#L525
-    /*
+    // /*
     out(graph: Graph) {
 
         const data_nodes: Array<any> = [];
@@ -110,9 +110,14 @@ export class AntvisTransformer implements ITransformer {
 
                 // label: node.content,
                 data: {
-                    node_id: node.id,
-                    node_type: node.type,
-                    label: node.variable,
+                    // _id: node.id,
+                    type: node.type,
+
+                    variable: node.variable,
+                    content: node.content,
+
+
+
                     // https://stackoverflow.com/a/62400741 , see reference in serialize fn.
                     // options: Object.fromEntries(Object.entries(node.options).filter(([key, value]) => {
                     //     return !['node_id', 'node_type', 'appearance'].includes(key);
@@ -128,11 +133,13 @@ export class AntvisTransformer implements ITransformer {
             );
 
             // because there are defaults
+            /*
             if (node_ser.width == null && node.appearance?.width != null)
                 node_ser.width = node.appearance.width;
             if (node_ser.height == null && node.appearance?.height != null)
                 node_ser.height = node.appearance.height;
-
+            */
+            
             data_nodes.push(node_ser);
         })
         
@@ -191,5 +198,5 @@ export class AntvisTransformer implements ITransformer {
 
         return data;
     }
-    */
+    // */
 }

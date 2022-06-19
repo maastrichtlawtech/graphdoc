@@ -28,7 +28,11 @@
         </div> -->
         
         <div class="toolbar-item">
-            <button class="bg-blue-200" :disabled="typeof graph === 'undefined'" @click="item_load_example()">Load example</button>
+            <button class="bg-blue-200" :disabled="typeof graph === 'undefined'" @click="item_load_example()">Load default example</button>
+        </div>
+        
+        <div class="toolbar-item">
+            <button class="bg-blue-200" :disabled="typeof graph === 'undefined'" @click="item_import_custom_json()">Import JSON</button>
         </div>
     </div>
 
@@ -40,6 +44,9 @@
     import { Dom, Addon, Graph } from '@antv/x6';
     import Transformer from '@/utils/transformer'
     import { JSONGraphData } from '@/utils/transformer/json';
+    import { useToast } from 'vue-toastification';
+
+    const toast = useToast();
 
     const { Dnd } = Addon;
 
@@ -67,6 +74,21 @@
             const antv = (new Transformer()).in_json(json).out_antv();
             props.graph?.fromJSON(antv);
             props.docassemble_cont_update!();
+        }
+    }
+
+    const item_import_custom_json = () => {
+        // props.docassemble_cont_update!()
+        const custom_json = prompt("Enter the JSON you wish to import")
+        if (custom_json) {
+            const custom_json_parsed = JSON.parse(custom_json);
+            if (custom_json_parsed) {
+                const antv = (new Transformer()).in_json(custom_json_parsed).out_antv();
+                props.graph?.fromJSON(antv);
+                props.docassemble_cont_update!();
+            } else {
+                toast.error("Failed to parse import")
+            }
         }
     }
     
