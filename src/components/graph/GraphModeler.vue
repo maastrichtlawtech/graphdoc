@@ -45,21 +45,9 @@
             </div>
         </div>
     </div>
-    <div class="border border-gray-500 rounded mt-4 mb-2 py-2 px-3" :class="{ 'bg-red-50': formatted_validation_errors.length > 0 }">
-        <template v-if="formatted_validation_errors.length > 0">
-            <span class="block font-medium mb-2">Validation errors</span>
-            <ul class="list-disc list-inside">
-                <li class="validation-error text-red-900" v-for="(validation_error, vei) in formatted_validation_errors" :key="vei">
-                    <!-- {{ validation_error }} -->
-                    <template v-for="err_part in validation_error" :key="err_part">
-                        <component v-if="(err_part as any).__v_isVNode ?? false" :is="err_part" />
-                        <template v-else>{{ err_part }}</template>
-                    </template>
-                </li>
-            </ul>
-        </template>
-        <span v-else class="block text-green-800">Graph contains no errors</span>
-    </div>
+    
+    <GraphValidationErrors :formatted_validation_errors="formatted_validation_errors" />
+    
     <div class="my-4">
         <span>Docassemble out:</span>
         <div class="relative">
@@ -84,9 +72,10 @@
     import GraphModelerConfigBar from './GraphModelerConfigBar.vue'
     import GraphModelerElementsBar from './GraphModelerElementsBar.vue'
     import GraphModelerToolbar from './GraphModelerToolbar.vue'
+    import GraphValidationErrors from './GraphValidationErrors.vue'
     
     import Transformer from '@/utils/transformer'
-    import { graph_options_defaults, graph_register_defaults } from '@/utils/model'
+    import { default_edge_label, graph_options_defaults, graph_register_defaults } from '@/utils/model'
     import { DocassembleTransformer, validationErrorList } from '@/utils/transformer/docassemble';
     import { Node, Edge } from '@/utils/graph';
 
@@ -110,19 +99,6 @@
             graph.value?.scrollToCell(cell);
         }
     }
-
-    const default_edge_label = (text = '') => {
-        return {
-            attrs: {
-                text: {
-                    text: text,
-                }
-            },
-            position: {
-                distance: .3,
-            },
-        }
-    };
 
     const docassemble_validation_errors: Ref<validationErrorList> = ref([]);
     const formatted_validation_errors: Ref<(string | VNode)[][]> = ref([]);

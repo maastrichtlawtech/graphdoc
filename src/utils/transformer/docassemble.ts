@@ -228,6 +228,9 @@ export class DocassembleTransformer implements ITransformer  {
                             buttons.push(`  - "${ edge_out.content }"`)
                     }
 
+                    // TODO: add option for priority of buttons (instead of sort)
+                    buttons.sort()
+
                     if (buttons.length > 0)
                         buttons = ['buttons:', ...buttons]
 
