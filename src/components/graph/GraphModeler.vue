@@ -30,14 +30,17 @@
                 :init_modeler="init_modeler"
                  />
         </div>
-        <div class="w-full flex" style="height: 550px;">
-            <div class="w-20 bg-gray-100 border-t  border-gray-200">
+        <div class="w-full flex" style="height: 500px;">
+            <div class="w-20 flex-initial bg-gray-100 border-t  border-gray-200">
                 <GraphModelerElementsBar v-if="graph !== null" :graph="graph"></GraphModelerElementsBar>
             </div>
-            <div id="modeler-container-box" class="w-32 flex-grow border border-b-0 border-gray-200" >
-                <div id="modeler-container" class="relative h-full"></div>
+            <div id="modeler-container-box" class="flex flex-grow border-4 border-b-0 border-gray-300" >
+            <!-- <div id="modeler-container-box" class="flex  w-full h-full" > -->
+                <!-- <div id="modeler-container" class="relative h-full"></div> -->
+                <!-- <div id="modeler-container" class="relative h-full flex-grow border-4 border-b-0 border-gray-300" style="flex: 1"></div> -->
+                <div id="modeler-container" style="flex: 1"></div>
             </div>
-            <div class="w-64 bg-gray-100 border-t border-gray-200 overflow-y-auto">
+            <div class="w-64 flex-initial bg-gray-100 border-t border-gray-200 overflow-y-auto">
                 <GraphModelerConfigBar :default_edge_label="default_edge_label" :cell="selected_cell"></GraphModelerConfigBar>
             </div>
         </div>
@@ -135,7 +138,14 @@
 
         docassemble_validation_errors.value = (new DocassembleTransformer()).validate_graph(transformer.graph);
 
-        console.log(docassemble_validation_errors.value)
+        // remove cells from all errors
+        graph.value.getCells().forEach(cell => 
+            typeof cell.getData()?.errors !== 'undefined' &&
+            cell.setData({'errors': false}, {no_da_update: true}));
+        
+        // graph.value.getCells().forEach(cell => console.log(typeof cell.getData()?.errors, cell.getData()));
+
+        // console.log(docassemble_validation_errors.value)
 
         // this part formats the conversion errors, which contain Node and Edge 
         // objects, to a clickable span as a VNode
@@ -145,31 +155,42 @@
                     return error_part;
                 } else if (error_part.is_node()) {
                     const error_node = (error_part as Node);
-                    return h('span', {
-                        onClick(event: any) {
-                            select_cell(graph.value?.getCellById(error_node.id));
-                        },
-                        class: 'clickable-entity'
-                    }, error_node.get_label());
+                    const antv_node = graph.value?.getCellById(error_node.id);
+                    if (typeof antv_node !== 'undefined') {
+                        antv_node.setData({errors: true}, {no_da_update: true});
+                        return h('span', {
+                            onClick(event: any) {
+                                select_cell(antv_node);
+                            },
+                            class: 'clickable-entity'
+                        }, error_node.get_label());
+                    } else {
+                        return `"${ error_node.get_label() }""`
+                    }
                 } else if (error_part.is_edge()) {
                     const error_edge = (error_part as Edge);
-                    return h('span', {
-                        onClick(event: any) {
-                            select_cell(graph.value?.getCellById(error_edge.content ? error_edge.id : error_edge.node_from_id));
-                        },
-                        class: 'clickable-entity'
-                    },
-                    error_edge.content ? 
+                    const antv_edge = graph.value?.getCellById(error_edge.id);
+                    const error_edge_content = error_edge.content ? 
                         `with content ${error_edge.content}` : 
-                        `leaving from node ${ error_edge.get_node_from().get_label() }`);
+                        `leaving from node ${ error_edge.get_node_from().get_label() }`;
+                    if (typeof antv_edge !== 'undefined') {
+                        return h('span', {
+                            onClick(event: any) {
+                                select_cell(graph.value?.getCellById(error_edge.content ? error_edge.id : error_edge.node_from_id));
+                            },
+                            class: 'clickable-entity'
+                        }, error_edge_content);
+                    } else {
+                        return `"${ error_edge_content }"`
+                    }
                 } else {
                     return ''
                 }
             });
-        })
+        });
 
 
-        console.log(formatted_validation_errors.value)
+        // console.log(formatted_validation_errors.value)
 
         if(formatted_validation_errors.value.length == 0)
             docassemble_cont.value = (new Transformer()).in_antv(graph.value).out_docassemble();
@@ -191,7 +212,7 @@
         // source: https://stackoverflow.com/a/67008779/17864167
         navigator.clipboard.writeText(docassemble_cont.value)
         .then(() => {
-            copy_button_content.value = 'COPIED';
+            copy_button_content.value = 'COPIED!';
             setTimeout(() => { copy_button_content.value = 'COPY' }, 1200)
         })
         .catch(err => {
@@ -223,14 +244,17 @@
         // graph.on('cell:change:*', ())
 
         graph.on('cell:change:*', (args) => {
-            // changes to ignore:
-            if (args.key == 'target') {
-                // when target hits, it changes from {x: n, y: n} to Cell, which we will catch here.
-                if (typeof args.current.cell != typeof args.previous.cell)
-                    docassemble_cont_update()
+            // console.log(args)
+            if (!(args.options.no_da_update ?? false)) {
+                if (args.key == 'target') {
+                    // when target hits, it changes from {x: n, y: n} to Cell, which we will catch here.
+                    if (typeof args.current.cell != typeof args.previous.cell)
+                        docassemble_cont_update()
 
-            } else if (!['target', 'zIndex', 'tools', 'position'].includes(args.key as string))
-                docassemble_cont_update()
+                // other changes to ignore:
+                } else if (!['target', 'zIndex', 'tools', 'position'].includes(args.key as string))
+                    docassemble_cont_update()
+            }
         })
 
         graph.on('cell:removed', docassemble_cont_update)
@@ -269,9 +293,13 @@
             ...graph_options_defaults,
 
             container: container,
-            width,
-            height,
+            autoResize: true,
+
+            // width,
+            // height,
         })
+
+        // graph.value.resize()
 
         if(graph.value != undefined)
         {

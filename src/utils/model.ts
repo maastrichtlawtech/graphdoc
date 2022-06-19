@@ -4,7 +4,7 @@ import { Options } from '@antv/x6/lib/graph/options';
 
 import { Node } from './graph';
 
-import '@antv/x6-vue-shape'
+// import '@antv/x6-vue-shape'
 
 export const default_edge_label = (text: string | null = '') => {
     if (text == null)
@@ -244,7 +244,8 @@ Graph.registerNode("vue-start", {
 // import start from '@/components/graph/nodes/stfart.vue'
 
 // export type AntvNodeData = Partial<Node> & Pick<Node, 'type' | 'options' | 'variable' | 'content'>;
-export type AntvNodeData = Pick<Node, 'type' | 'options' | 'variable' | 'content'>;
+export type AntvNodeData = Pick<Node, 'type' | 'options' | 'variable' | 'content'> 
+    & { errors?: boolean };
 
 const node_html = {
     render(node: AntvNode) {
@@ -257,7 +258,7 @@ const node_html = {
             label = data.variable;
             label_class = 'node-label-variable';
         } else if (data.content) {
-            label = data.content;
+            label = `"${data.content}"`;
             label_class = 'node-label-content';
         } else {
             label =  `unnamed ${data.type} node`;
@@ -265,7 +266,7 @@ const node_html = {
         }
 
         return(
-            `<div class="node node-${ data.type }">
+            `<div class="node node-${ data.type } ${ data.errors ? 'node-has-errors' : '' }">
                 <span class="${ label_class }">${ label }</span>
             </div>`
         )

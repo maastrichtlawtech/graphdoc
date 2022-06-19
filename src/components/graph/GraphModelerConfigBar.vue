@@ -24,6 +24,7 @@
                         <label v-if="field == 'variable'">
                             <span class="text-gray-700 block mb-1">Variable</span>
                             <div>
+                                <!-- <input class="w-full" type="text" :placeholder="cell.id" v-model="node_variable" /> -->
                                 <input class="w-full" type="text" v-model="node_variable" />
                             </div>
                         </label>
@@ -70,7 +71,7 @@
             <div class="p-2">
                 <span class="my-2 block border-b border-gray-300 uppercase font-bold text-sm text-gray-800">General</span>
 
-                <div class="block mt-2 mb-1 ">
+                <div class="block mt-2">
                     <label>
                         <span class="text-gray-700 block mb-1">Label</span>
                         <input
@@ -79,6 +80,10 @@
                             :value="edge_get_label()" 
                             @input="event => edge_set_label((event.target as HTMLInputElement).value)" />
                     </label>
+                    <div class="flex">
+                        <button class="flex-1 border bg-gray-500 m-1" @click="edge_set_label('Yes')">Yes</button>
+                        <button class="flex-1 border bg-gray-500 m-1" @click="edge_set_label('No')">No</button>
+                    </div>
                 </div>
 
             </div>

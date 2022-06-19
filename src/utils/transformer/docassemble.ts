@@ -44,7 +44,6 @@ export class DocassembleTransformer implements ITransformer  {
             if (has_edge_out_content_null)
                 errors.push(['decision node ', node_decision, ' has atleast one outgoing edge with no content']);
             
-            console.log(content_edges_out);
             Object.entries(content_edges_out).forEach(([content, amount]) => {
                 
                 if (amount > 1) {
@@ -56,8 +55,7 @@ export class DocassembleTransformer implements ITransformer  {
                     const error_start: validationErrorPart[] = [
                         `the decision node `, 
                         node_decision, 
-                        ` has multiple edges with content '${ edges[0].content }'`,
-                        'on the edges: '
+                        ` has multiple edges with content '${ edges[0].content }' on the edges: `,
                     ];
                     edges.forEach((tmp_edge) => { error_start.push(tmp_edge, ', ') })
 
@@ -67,13 +65,11 @@ export class DocassembleTransformer implements ITransformer  {
         }
 
         for (const node of graph.nodes) {
-            // if (node.type == 'start' && node.get_edges_in().length > 0)
-            //     errors.push(`start node with label ${node.content} must have no ingoing edges`) // impossible (?)
             if (node.type == 'start' && node.get_edges_out().length !== 1)
-                errors.push(['start node ', node, ' must have one outgoing edge'])
+                errors.push(['start node ', node, ` must have 1 outgoing edge (has ${node.get_edges_out().length})`])
 
             // else if (node.type == 'decision' && node.get_edges_out().length === 1)
-            //     errors.push(`decision node with label ${node.content} has one outgoing edge, which makes it purpose trivial`) // recommendation
+            //     errors.push(`decision node with label ${node.content} has one outgoing edge, which makes it purpose trivial`) // warning
             else if (node.type == 'decision' && node.get_edges_in().length === 0)
                 errors.push(['decision node ', node, ' must have atleast one ingoing edge'])
             else if (node.type == 'decision' && node.get_edges_out().length === 0)
@@ -85,8 +81,7 @@ export class DocassembleTransformer implements ITransformer  {
                 errors.push(['notice node ', node, ' must have one outgoing edge'])
 
             else if (node.type == 'end' && node.get_edges_in().length === 0){
-                console.log("NODE", node)
-                errors.push(['end node ', node, ' must have one ingoing edge'])
+                errors.push(['end node ', node, ' must have atleast one ingoing edge'])
             }
         }
 
@@ -99,7 +94,7 @@ export class DocassembleTransformer implements ITransformer  {
             const S = graph.nodes.filter(x => x.get_edges_in().length === 0);
 
             let edges = [...graph.edges]
-            console.log(edges);
+            // console.log(edges);
 
             while (S.length > 0) {
                 const n = S.pop()!;
