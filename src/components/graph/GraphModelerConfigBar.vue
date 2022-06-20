@@ -81,8 +81,8 @@
                             @input="event => edge_set_label((event.target as HTMLInputElement).value)" />
                     </label>
                     <div class="flex">
-                        <button class="flex-1 border bg-gray-500 m-1" @click="edge_set_label('Yes')">Yes</button>
-                        <button class="flex-1 border bg-gray-500 m-1" @click="edge_set_label('No')">No</button>
+                        <button class="flex-1 btn" @click="edge_set_label('Yes')">Yes</button>
+                        <button class="flex-1 btn" @click="edge_set_label('No')">No</button>
                     </div>
                 </div>
 
