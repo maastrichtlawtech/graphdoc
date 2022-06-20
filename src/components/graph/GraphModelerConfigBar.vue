@@ -80,7 +80,7 @@
                             v-model="edge_content" />
                     </label>
                     <div class="w-full my-2 text-right">
-                        <button class="inline btn mr-1" @click="edge_content = 'Yes'">Yes</button>
+                        <button class="inline btn mr-2" @click="edge_content = 'Yes'">Yes</button>
                         <button class="inline btn" @click="edge_content = 'No'">No</button>
                     </div>
                 </div>
