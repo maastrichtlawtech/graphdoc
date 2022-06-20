@@ -28,7 +28,7 @@ export const NodeDefault = {
         width: 100, height: 100
     },
     options: {},
-    content: '<empty>',
+    content: null,
     type: 'notice'
 }
 
