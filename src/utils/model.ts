@@ -261,7 +261,7 @@ const node_html = {
             label = `"${data.content}"`;
             label_class = 'node-label-content';
         } else {
-            label =  `unnamed ${data.type} node`;
+            label = `unnamed ${data.type} node`;
             label_class = 'node-label-unnamed';
         }
 

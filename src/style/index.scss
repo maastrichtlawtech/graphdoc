@@ -105,3 +105,20 @@ html {
         }
     }
 }
+
+button.btn {
+
+    &[disabled] {
+        @apply bg-gray-300 cursor-not-allowed;
+    }
+
+    @apply bg-white border border-gray-300 text-gray-800 px-3 py-1  mr-2 rounded-md flex items-center font-normal;
+
+    i {
+        @apply mr-2 text-lg leading-none;
+    }
+
+    &:hover {
+        @apply ring-4 ring-gray-200 border-gray-400 cursor-pointer ;
+    }
+}
