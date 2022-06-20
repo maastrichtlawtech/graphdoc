@@ -57,7 +57,11 @@ export class DocassembleTransformer implements ITransformer  {
                         node_decision, 
                         ` has multiple edges with content '${ edges[0].content }' on the edges: `,
                     ];
-                    edges.forEach((tmp_edge) => { error_start.push(tmp_edge, ', ') })
+                    edges.forEach((tmp_edge, i) => {
+                        error_start.push(tmp_edge)
+                        if (i < (edges.length - 1))
+                            error_start.push(', ')
+                    })
 
                     errors.push(error_start)
                 }
