@@ -68,7 +68,7 @@
                 <button @click="cell?.remove()" class="action-btn-remove">Remove</button>
             </div>
 
-            <div class="p-2">
+            <div class="p-2" v-if="(cell.getSourceCell()?.getData() as AntvNodeData).type == 'decision'">
                 <span class="my-2 block border-b border-gray-300 uppercase font-bold text-sm text-gray-800">General</span>
 
                 <div class="block mt-2">
@@ -77,15 +77,16 @@
                         <input
                             type="text"
                             class="w-full"
-                            :value="edge_get_label()" 
-                            @input="event => edge_set_label((event.target as HTMLInputElement).value)" />
+                            v-model="edge_content" />
                     </label>
-                    <div class="flex">
-                        <button class="flex-1 btn" @click="edge_set_label('Yes')">Yes</button>
-                        <button class="flex-1 btn" @click="edge_set_label('No')">No</button>
+                    <div class="w-full my-2 text-right">
+                        <button class="inline btn mr-1" @click="edge_content = 'Yes'">Yes</button>
+                        <button class="inline btn" @click="edge_content = 'No'">No</button>
                     </div>
                 </div>
 
+                <!-- <span class="my-2 block border-b border-gray-300 uppercase font-bold text-sm text-gray-800">Appearance</span>
+                <span class="text-gray-700 block mb-1">Nothing here yet</span> -->
             </div>
 
         </div>
@@ -116,15 +117,6 @@
     const props = defineProps<{
         cell: Cell | undefined
     }>();
-
-    onMounted(() => {
-        // axios.get(route('dashboard.graph.index.json')).then((resp) => {
-        //     this.subgraph_options = resp.data.graphs;
-        // });
-    })
-
-    // const null_value = null;
-    // const subgraph_options = ref(null);
     
     const current_fields = computed(() => {
         const field = props.cell?.getData()?.node_type ?? node_type_default;
@@ -181,29 +173,49 @@
     }
     */
 
+    // only reason for 'edge_content_ref' is for adding reactivity to edge_content,
+    // relevant for pressing buttons
+    const edge_content_ref = ref('');
+    const edge_content = computed({
+        get() {
+            const edge = props.cell as Edge;
+            edge_content_ref.value;
+            return edge.getLabelAt(0)?.attrs?.text?.text?.toString() ?? '';
+        },
+        set(value: string) {
+            const edge = props.cell as Edge;
+
+            const edge_label = default_edge_label(value);
+            if (edge_label != null) {
+                edge.removeLabelAt(0);
+                edge.setLabelAt(0, edge_label);
+            }
+
+            edge_content_ref.value = value;
+            edge.setData({value})
+        }
+    });
+
+    /*
     const edge_get_label = () => {
-        // return this.cell.store?.data?.labels?.[0] ?? '';
-        
-        // console.log(props.cell);
-        return (props.cell as Edge).getLabelAt(0)?.attrs?.text?.text ?? '';
-        // return props.cell?.getData()?.labels?.[0].attrs.text.text ?? '';
-        
-        // return (props.cell as any).getLabels()[0] ?? ''
+        const edge = props.cell as Edge;
+        return edge.getLabelAt(0)?.attrs?.text?.text ?? '';
     };
+    */
     
+    /*
     const edge_set_label = (content?: string) => {
-        // (props.cell as any).setLabels(content)
+        const edge = props.cell as Edge;
 
         const edge_label = default_edge_label(content);
         if (edge_label != null) {
-            (props.cell as Edge).removeLabelAt(0);
-            (props.cell as Edge).setLabelAt(0, edge_label);
+            edge.removeLabelAt(0);
+            edge.setLabelAt(0, edge_label);
         }
 
-        (props.cell as Edge).setData({content})
-
-        // console.log("CELL DATA", props.cell)
+        edge.setData({content})
     }
+    */
 
 </script>
 

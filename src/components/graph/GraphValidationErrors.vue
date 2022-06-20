@@ -21,8 +21,7 @@
 <script lang="ts" setup>
 
     import { VNode } from 'vue';
-
-    // const props = defineProps<{formatted_validation_errors: Ref<(string | VNode)[][]>}>();
+    
     const props = defineProps<{formatted_validation_errors: (string | VNode)[][]}>();
 
 </script>
@@ -31,6 +30,7 @@
 .validation-error {
     span.clickable-entity {
         @apply font-mono text-sm;
+        font-size: 0.7rem;
 
         color: rgb(63, 19, 19);
         cursor: pointer;

@@ -41,7 +41,7 @@
                 <div id="modeler-container" style="flex: 1"></div>
             </div>
             <div class="w-64 flex-initial bg-gray-100 border-t border-gray-200 overflow-y-auto">
-                <GraphModelerConfigBar :default_edge_label="default_edge_label" :cell="selected_cell"></GraphModelerConfigBar>
+                <GraphModelerConfigBar :cell="selected_cell"></GraphModelerConfigBar>
             </div>
         </div>
     </div>

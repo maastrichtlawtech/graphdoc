@@ -174,18 +174,42 @@ const default_port_groups = {
         attrs: {
             circle: {
                 r: 6,
+                stroke: "#6a6a6b",
                 magnet: true,
             }
         },
+        // markup: {
+        //     tagName: 'path',
+        //     selector: 'path',
+        //     attrs: {
+        //         d: "M 0 5 L 6.25 -5 L -6.25 -5 L 0 5",
+        //         fill: "#fff",
+        //         stroke: "#6a6a6b",
+        //         'stroke-width': "1",
+        //         magnet: true
+        //     }
+        // },
         position: 'top'
     },
     out: {
         attrs: {
             circle: {
                 r: 6,
+                stroke: "#6a6a6b",
                 magnet: true,
             }
         },
+        // markup: {
+        //     tagName: 'path',
+        //     selector: 'path',
+        //     attrs: {
+        //         d: "M 0 -5 L 6.25 5 L -6.25 5 L 0 -5",
+        //         fill: "#fff",
+        //         stroke: "#6a6a6b",
+        //         'stroke-width': "1",
+        //         magnet: true
+        //     }
+        // },
         position: 'bottom'
     },
 }
