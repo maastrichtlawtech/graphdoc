@@ -10,9 +10,9 @@ export type validationErrorList = Array<validationErrorPart>[];
 export class DocassembleTransformer implements ITransformer  {
 
     validate_graph(graph: Graph): validationErrorList {
-        // const errors: validationErrorList = {node: {}, edge: {}, general: []};
         const errors: validationErrorList = [];
 
+        // General graph errors
         const node_start = graph.get_nodes_by_type('start');
         if (node_start.length !== 1)
             errors.push([`graph must have exactly one start node (has ${node_start.length})`]);
@@ -20,6 +20,66 @@ export class DocassembleTransformer implements ITransformer  {
         if (nodes_end.length === 0)
             errors.push([`graph must have atleast one end node`])
 
+        // General input/output amount errors, and uniqueness of ID's.
+        const variable_list: {[variable: string]: {amount: number, nodes: Node[]}} = {};
+        for (const node of graph.nodes) {
+
+            // Add variables to list in this phase, to save iterations
+            const node_var = this.da_node_get_id(node);
+            if (node_var in variable_list) {
+                variable_list[node_var].amount += 1;
+                variable_list[node_var].nodes.push(node);
+            } else {
+                variable_list[node_var] = {amount: 1, nodes: [node]};
+            }
+            
+            // Interpreting of edge amount errors
+            if (node.gd.type == 'start' && node.get_edges_out().length !== 1)
+                errors.push(['start node ', node, ` must have 1 outgoing edge (has ${node.get_edges_out().length})`])
+
+            // else if (node.type == 'decision' && node.get_edges_out().length === 1)
+            //     errors.push(`decision node with label ${node.content} has one outgoing edge, which makes it purpose trivial`) // warning
+            else if (node.gd.type == 'decision' && node.get_edges_in().length === 0)
+                errors.push(['decision node ', node, ' must have atleast one ingoing edge'])
+            else if (node.gd.type == 'decision' && node.get_edges_out().length === 0)
+                errors.push(['decision node ', node, ' must have atleast one outgoing edge'])
+
+            else if (node.gd.type == 'notice' && node.get_edges_in().length === 0)
+                errors.push(['notice node ', node, ' must have atleast one ingoing edge'])
+            else if (node.gd.type == 'notice' && node.get_edges_out().length !== 1)
+                errors.push(['notice node ', node, ' must have one outgoing edge'])
+
+            else if (node.gd.type == 'end' && node.get_edges_in().length === 0){
+                errors.push(['end node ', node, ' must have atleast one ingoing edge'])
+            }
+        }
+
+        // Checking variable names: duplicate and invalid names
+        for (const [variable, {amount, nodes}] of Object.entries(variable_list)) {
+            console.log(variable, amount, nodes)
+
+            const seperated_error_nodes: (string | Node)[] = [];
+            nodes.forEach((node, i) => {
+                seperated_error_nodes.push(node);
+                if (i < (nodes.length - 1))
+                   seperated_error_nodes.push(', ');
+            })
+
+            if (!variable.match(/^[a-zA-Z_][a-zA-Z0-9_]*$/))
+                errors.push([
+                    `invalid (python) variable name '${variable}' on the node(s): `,
+                    ...seperated_error_nodes
+                ])
+
+            if (amount > 1) {
+                errors.push([
+                    `variable name '${variable}' occurs is defined more than once, in the nodes: `,
+                    ...seperated_error_nodes
+                ]);
+            }
+        }
+
+        // Decision-node specific errors
         const nodes_decision = graph.get_nodes_by_type('decision');
         for(const node_decision of nodes_decision) {
             let has_edge_out_content_null = false;
@@ -68,26 +128,6 @@ export class DocassembleTransformer implements ITransformer  {
             });
         }
 
-        for (const node of graph.nodes) {
-            if (node.gd.type == 'start' && node.get_edges_out().length !== 1)
-                errors.push(['start node ', node, ` must have 1 outgoing edge (has ${node.get_edges_out().length})`])
-
-            // else if (node.type == 'decision' && node.get_edges_out().length === 1)
-            //     errors.push(`decision node with label ${node.content} has one outgoing edge, which makes it purpose trivial`) // warning
-            else if (node.gd.type == 'decision' && node.get_edges_in().length === 0)
-                errors.push(['decision node ', node, ' must have atleast one ingoing edge'])
-            else if (node.gd.type == 'decision' && node.get_edges_out().length === 0)
-                errors.push(['decision node ', node, ' must have atleast one outgoing edge'])
-
-            else if (node.gd.type == 'notice' && node.get_edges_in().length === 0)
-                errors.push(['notice node ', node, ' must have atleast one ingoing edge'])
-            else if (node.gd.type == 'notice' && node.get_edges_out().length !== 1)
-                errors.push(['notice node ', node, ' must have one outgoing edge'])
-
-            else if (node.gd.type == 'end' && node.get_edges_in().length === 0){
-                errors.push(['end node ', node, ' must have atleast one ingoing edge'])
-            }
-        }
 
         // only perform cycle check if no other errors are present
         if (errors.length === 0) {
@@ -113,9 +153,6 @@ export class DocassembleTransformer implements ITransformer  {
                 }
             }
 
-            // console.log("TOPO SORT:", L);
-            // console.log("EDGES:", edges);
-
             if (edges.length > 0) {
                 errors.push(['graph must not contain cycles/loops'])
             }
@@ -126,7 +163,7 @@ export class DocassembleTransformer implements ITransformer  {
     
     da_node_get_id(node: Node): string {
         // return `${ node.type }_${ node.variable }`
-        console.log(node, `${ node.gd.type }_${node.id.toString().substring(0, 8)}`)
+        // console.log(node, `${ node.gd.type }_${node.id.toString().substring(0, 8)}`)
         return node.gd.variable ?? `${ node.gd.type }_${node.id.toString().substring(0, 8)}`;
     }
 
@@ -241,7 +278,7 @@ export class DocassembleTransformer implements ITransformer  {
 
                     blocks.push([
                         'question: Question',
-                        `subquestion: ${ node.get_content() }`,
+                        `subquestion: '${ node.get_content() }'`,
                         `field: ${ this.da_node_get_id(node) }`,
                         ...buttons
                     ]);
@@ -251,7 +288,7 @@ export class DocassembleTransformer implements ITransformer  {
                 case 'notice': {
                     blocks.push([
                         'question: Notice',
-                        `subquestion: ${ node.get_content() }`,
+                        `subquestion: '${ node.get_content() }'`,
                         `continue button field: ${ this.da_node_get_id(node) }`,
                     ]);
 
