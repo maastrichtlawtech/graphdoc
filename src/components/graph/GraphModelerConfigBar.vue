@@ -9,7 +9,7 @@
     <div v-else-if="cell.isNode()" class="w-full">
     
         <div class="">
-            <span class="m-2 font-bold block text-2xl border-b border-gray-300">{{ titleCase((cell.data as AntvNodeData).type) }} node</span>
+            <span class="m-2 font-bold block text-2xl border-b border-gray-300">{{ titleCase((cell.data as AntvNodeData).gd.type) }} node</span>
             
             <div class="p-2">
                 <button @click="cell?.remove()" class="action-btn-remove">Remove</button>
@@ -68,7 +68,7 @@
                 <button @click="cell?.remove()" class="action-btn-remove">Remove</button>
             </div>
 
-            <div class="p-2" v-if="(cell.getSourceCell()?.getData() as AntvNodeData).type == 'decision'">
+            <div class="p-2" v-if="(cell.getSourceCell()?.getData() as AntvNodeData).gd.type == 'decision'">
                 <span class="my-2 block border-b border-gray-300 uppercase font-bold text-sm text-gray-800">General</span>
 
                 <div class="block mt-2">
@@ -101,7 +101,7 @@
 <script lang="ts" setup>
 
     import { computed, onMounted, ref } from 'vue';
-    import { default_edge_label, node_types, node_type_default, AntvNodeData } from '@/utils/model'
+    import { default_edge_label, node_types, node_type_default, AntvNodeData } from '@/utils/antv-model'
 
     import { Cell, Edge, Node } from '@antv/x6'
 
@@ -139,21 +139,21 @@
             // https://github.com/antvis/X6/issues/2020#issuecomment-1104644438
             // return (props.cell as Node).getAttrByPath('text/text') as string
 
-            return (props.cell as Node).getData().content ?? '';
+            return (props.cell as Node).getData().gd.content ?? '';
         },
         set(value: string) {
             // (props.cell as Node).setAttrByPath('text/text', value)
 
-            (props.cell as Node).setData({content: value});
+            (props.cell as Node).setData({gd: {content: value}});
         }
     });
 
     const node_variable = computed({
         get() {
-            return (props.cell as Node).getData().variable ?? '';
+            return ((props.cell as Node).getData() as AntvNodeData).gd.variable ?? '';
         },
         set(value: string) {
-            (props.cell as Node).setData({variable: value != '' ? value : null});
+            (props.cell as Node).setData({gd: {variable: value != '' ? value : null}});
         }
     });
 
