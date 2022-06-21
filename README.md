@@ -4,13 +4,51 @@
 
 GraphDoc is a web-application that has been developed on behalf of the [Maastricht Law & Tech Lab](https://github.com/maastrichtlawtech/), which is part of Maastricht University in The Netherlands.
 
-The goal of this application is to aid users in visually constructing Docassemble interview configuration files.
+The goal of this application is to aid users in visually constructing [Docassemble](https://github.com/jhpyle/docassemble/) interview configuration files.
 
-## Screenshots
+## Demo
+The demo is available at [https://maastrichtlawtech.github.io/graphdoc/](https://maastrichtlawtech.github.io/graphdoc/).
+
+### Example
 
 User Interface | Docassemble
 -- | --
-![UI](https://user-images.githubusercontent.com/50321538/173640178-b5ac3958-e982-467e-8d93-7e48d81bb81c.png) | ![afbeelding](https://user-images.githubusercontent.com/50321538/173640275-d485c7cb-06a4-4eae-93a6-0aa080d208a5.png)
+![ui](https://user-images.githubusercontent.com/50321538/174894290-6d5a6e41-4966-406d-9537-3bdf127eb63b.png) | ![docassemble output](https://user-images.githubusercontent.com/50321538/173640275-d485c7cb-06a4-4eae-93a6-0aa080d208a5.png)
+
+The interview constructed in the above screenshot results in the following Docassemble interview configuration file:
+```yaml
+question: Start
+subquestion: 'walk or bus?'
+continue button field: walk_or_bus
+---
+question: Question
+subquestion: 'is it raining?'
+field: is_raining
+buttons:
+  - "No"
+  - "Yes"
+---
+question: Notice
+subquestion: 'take an umbrella'
+continue button field: notice_take_umbrella
+---
+code: |
+  bus = 'bus'
+  walk = 'walk'
+  def get_outcome_walk_or_bus():
+    walk_or_bus
+    if is_raining == 'Yes':
+      notice_take_umbrella
+      return bus
+    if is_raining == 'No':
+      return walk
+  outcome = get_outcome_walk_or_bus()
+---
+mandatory: True
+question: End
+subquestion: ${outcome}
+```
+
 
 ## Usage         
 
