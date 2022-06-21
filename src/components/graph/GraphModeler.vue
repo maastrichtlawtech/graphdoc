@@ -78,7 +78,7 @@
     import GraphValidationErrors from './GraphValidationErrors.vue'
     
     import Transformer from '@/utils/transformer'
-    import { default_edge_label, graph_options_defaults, graph_register_defaults } from '@/utils/model'
+    import { default_edge_label, graph_options_defaults, graph_register_defaults } from '@/utils/antv-model'
     import { DocassembleTransformer, validationErrorList } from '@/utils/transformer/docassemble';
     import { Node, Edge } from '@/utils/graph';
 
@@ -158,13 +158,13 @@
                 } else if (error_part.is_edge()) {
                     const error_edge = (error_part as Edge);
                     const antv_edge = graph.value?.getCellById(error_edge.id);
-                    const error_edge_content = error_edge.content ? 
-                        `with content ${error_edge.content}` : 
+                    const error_edge_content = error_edge.gd.content ? 
+                        `with content ${error_edge.gd.content}` : 
                         `leaving from node ${ error_edge.get_node_from().get_label() }`;
                     if (typeof antv_edge !== 'undefined') {
                         return h('span', {
                             onClick(event: any) {
-                                select_cell(graph.value?.getCellById(error_edge.content ? error_edge.id : error_edge.node_from_id));
+                                select_cell(graph.value?.getCellById(error_edge.gd.content ? error_edge.id : error_edge.node_from_id));
                             },
                             class: 'clickable-entity'
                         }, error_edge_content);

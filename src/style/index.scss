@@ -57,6 +57,7 @@ html {
     span {
         &.node-label-variable {
             @apply font-mono;
+            font-size: 0.85rem;
         }
         &.node-label-content {
             // ...

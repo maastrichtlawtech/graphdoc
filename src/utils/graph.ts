@@ -1,4 +1,6 @@
-import { node_types } from "./model";
+// This file is basically 'graphdoc-model'
+
+import { node_types } from "./antv-model";
 import { Filter } from "@antv/x6/lib/registry";
 import { uuid } from "./data/uuid";
 
@@ -9,27 +11,30 @@ export interface Node {
     graph: Graph
     id: Id,
 
-    type: keyof node_types,
-
-    variable: string,
-    content: string,
+    gd: {
+        type: keyof node_types,
+        variable?: string | null,
+        content?: string | null,
+    }
     // content: {[lang: string]: string}, // for multilang support
     
-    options: {[key: string]: any},
+    // options: {[key: string]: any},
     appearance: {
         x: number, y: number,
         width: number, height: number,
     },
 }
 
-export const NodeDefault = {
+export const NodeDefault: Partial<Node> = {
     appearance: {
         x: 0, y: 0,
         width: 100, height: 100
     },
-    options: {},
-    content: null,
-    type: 'notice'
+    gd: {
+        type: 'notice', // notice is most generic
+        content: null,
+        variable: null
+    },
 }
 
 export class Node {
@@ -56,11 +61,11 @@ export class Node {
     is_edge() { return false; }
 
     get_label() {
-        return this.variable ?? this.content ?? this.id.substring(0, 8);
+        return this.gd.variable ?? this.gd.content ?? this.id.substring(0, 8);
     }
     
     get_content() {
-        return this.content ?? `[content of node ${ this.id.substring(0, 8) }]`
+        return this.gd.content ?? `[content of node ${ this.id.substring(0, 8) }]`
     }
  
     get_edges_in() {
@@ -96,11 +101,15 @@ export interface Edge {
     node_from_id: Id,
     node_to_id: Id,
     
-    content: string | null,
+    gd: {
+        content: string | null,
+    }
 }
 
 export const EdgeDefault: Partial<Edge> = {
-    content: null,
+    gd: {
+        content: null,
+    }
 }
 
 export class Edge {
@@ -147,15 +156,15 @@ class Graph {
     }
 
     get_nodes_by_type(type: keyof node_types) {
-        return this.nodes.filter(x => x.type == type) ?? [];
+        return this.nodes.filter(x => x.gd.type == type) ?? [];
     }
 
     // add_node(options: Partial<Node>) {
-    add_node(options: Partial<Node> & Pick<Node, 'id' | 'content' | 'type' | 'appearance'>) {
+    add_node(options: Partial<Node> & Pick<Node, 'id' | 'appearance' | 'gd'>) {
         this.nodes.push(new Node({...options, graph: this}))
     }
 
-    add_edge(options: Partial<Edge> & Pick<Edge, 'id' | 'node_from_id' | 'node_to_id' | 'content'>) {
+    add_edge(options: Partial<Edge> & Pick<Edge, 'id' | 'node_from_id' | 'node_to_id' | 'gd'>) {
         this.edges.push(new Edge({...options, graph: this}))
     }
 

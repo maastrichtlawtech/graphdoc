@@ -2,7 +2,7 @@
 import { Cell, Graph, Node as AntvNode, Path } from '@antv/x6';
 import { Options } from '@antv/x6/lib/graph/options';
 
-import { Node } from './graph';
+import { Node, NodeDefault } from './graph';
 
 // import '@antv/x6-vue-shape'
 
@@ -243,11 +243,18 @@ export type node_types = {
 };
 export const node_type_default = 'notice';
 
-// import start from '@/components/graph/nodes/stfart.vue'
-
 // export type AntvNodeData = Partial<Node> & Pick<Node, 'type' | 'options' | 'variable' | 'content'>;
-export type AntvNodeData = Pick<Node, 'type' | 'options' | 'variable' | 'content'> 
-    & { errors?: boolean };
+// export type AntvNodeData = Pick<Node, 'type' | 'options' | 'variable' | 'content'> 
+//     & { errors?: boolean };
+export type AntvNodeData = {
+    errors?: boolean,
+    // gd for 'graphdoc' model
+    // gd: Partial<Node> & Pick<Node, 'type' | 'options' | 'variable' | 'content'> 
+    // Partial<Pick<...>> are optional data entries, Pick<...> are required.
+    // gd: Partial<Pick<Node, 'options'>> & Pick<Node, 'type' | 'variable' | 'content'> 
+
+    gd: Node['gd']
+}
 
 const node_html = {
     render(node: AntvNode) {
@@ -256,19 +263,19 @@ const node_html = {
         let label = '';
         let label_class = '';
 
-        if (data.variable) {
-            label = data.variable;
+        if (data.gd.variable) {
+            label = data.gd.variable;
             label_class = 'node-label-variable';
-        } else if (data.content) {
-            label = `"${data.content}"`;
+        } else if (data.gd.content) {
+            label = `"${data.gd.content}"`;
             label_class = 'node-label-content';
         } else {
-            label = `unnamed ${data.type} node`;
+            label = `unnamed ${data.gd.type} node`;
             label_class = 'node-label-unnamed';
         }
 
         return(
-            `<div class="node node-${ data.type } ${ data.errors ? 'node-has-errors' : '' }">
+            `<div class="node node-${ data.gd.type } ${ data.errors ? 'node-has-errors' : '' }">
                 <span class="${ label_class }">${ label }</span>
             </div>`
         )
@@ -288,8 +295,9 @@ export const node_types: node_types = {
             width: 180,
             height: 36,
             data: {
-                type: 'start',
-                options: {},
+                gd: Object.assign({}, NodeDefault.gd, {
+                    type: 'start'
+                }),
             },
             ports: default_node_ports(['out']),
         },
@@ -312,8 +320,9 @@ export const node_types: node_types = {
             height: 36,
 
             data: {
-                type: 'decision',
-                options: {}
+                gd: Object.assign({}, NodeDefault.gd, {
+                    type: 'decision'
+                }),
             },
             ports: default_node_ports(['in', 'out']),
         },
@@ -337,8 +346,9 @@ export const node_types: node_types = {
             height: 36,
             
             data: {
-                type: 'notice',
-                options: {}
+                gd: Object.assign({}, NodeDefault.gd, {
+                    type: 'notice'
+                }),
             },
             ports: default_node_ports(['in', 'out']),
         },
@@ -361,8 +371,9 @@ export const node_types: node_types = {
             height: 36,
             
             data: {
-                type: 'end',
-                options: {}
+                gd: Object.assign({}, NodeDefault.gd, {
+                    type: 'end'
+                }),
             },
             ports: default_node_ports(['in']),
         },

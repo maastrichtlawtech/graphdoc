@@ -28,16 +28,16 @@ export class DocassembleTransformer implements ITransformer  {
             const node_edges_out = node_decision.get_edges_out();
 
             for (const edge_out of node_edges_out) {
-                if (edge_out.content == null)
+                if (edge_out.gd.content == null)
                     has_edge_out_content_null = true;
                 
                 // if length == 1, to ensure it's only printed once
                 // if (content_edges_out.filter(x => x == edge_out.content).length == 1)
                 //     errors.push(`decision node with label '${node_decision.content}' has multiple edges with content '${ edge_out.content }' (should be unique)`)
                 
-                if (edge_out.content != null){
+                if (edge_out.gd.content != null){
                     // https://stackoverflow.com/a/39591024
-                    content_edges_out[edge_out.content] = (content_edges_out[edge_out.content]+1) || 1 ;
+                    content_edges_out[edge_out.gd.content] = (content_edges_out[edge_out.gd.content]+1) || 1 ;
                 }
             }
             
@@ -51,11 +51,11 @@ export class DocassembleTransformer implements ITransformer  {
                     //     // errors.push(`decision node with label '${ node_decision.content }' has multiple edges with content '${ edge_out.content }' (should be unique)`)
                     //     errors.push([`multiple edges with content '${ edge.content }' exist on the decision node `, node_decision])
                     // })
-                    const edges = node_edges_out.filter(edge => edge.content = content);
+                    const edges = node_edges_out.filter(edge => edge.gd.content = content);
                     const error_start: validationErrorPart[] = [
                         `the decision node `, 
                         node_decision, 
-                        ` has multiple edges with content '${ edges[0].content }' on the edges: `,
+                        ` has multiple edges with content '${ edges[0].gd.content }' on the edges: `,
                     ];
                     edges.forEach((tmp_edge, i) => {
                         error_start.push(tmp_edge)
@@ -69,22 +69,22 @@ export class DocassembleTransformer implements ITransformer  {
         }
 
         for (const node of graph.nodes) {
-            if (node.type == 'start' && node.get_edges_out().length !== 1)
+            if (node.gd.type == 'start' && node.get_edges_out().length !== 1)
                 errors.push(['start node ', node, ` must have 1 outgoing edge (has ${node.get_edges_out().length})`])
 
             // else if (node.type == 'decision' && node.get_edges_out().length === 1)
             //     errors.push(`decision node with label ${node.content} has one outgoing edge, which makes it purpose trivial`) // warning
-            else if (node.type == 'decision' && node.get_edges_in().length === 0)
+            else if (node.gd.type == 'decision' && node.get_edges_in().length === 0)
                 errors.push(['decision node ', node, ' must have atleast one ingoing edge'])
-            else if (node.type == 'decision' && node.get_edges_out().length === 0)
+            else if (node.gd.type == 'decision' && node.get_edges_out().length === 0)
                 errors.push(['decision node ', node, ' must have atleast one outgoing edge'])
 
-            else if (node.type == 'notice' && node.get_edges_in().length === 0)
+            else if (node.gd.type == 'notice' && node.get_edges_in().length === 0)
                 errors.push(['notice node ', node, ' must have atleast one ingoing edge'])
-            else if (node.type == 'notice' && node.get_edges_out().length !== 1)
+            else if (node.gd.type == 'notice' && node.get_edges_out().length !== 1)
                 errors.push(['notice node ', node, ' must have one outgoing edge'])
 
-            else if (node.type == 'end' && node.get_edges_in().length === 0){
+            else if (node.gd.type == 'end' && node.get_edges_in().length === 0){
                 errors.push(['end node ', node, ' must have atleast one ingoing edge'])
             }
         }
@@ -126,7 +126,8 @@ export class DocassembleTransformer implements ITransformer  {
     
     da_node_get_id(node: Node): string {
         // return `${ node.type }_${ node.variable }`
-        return `${ node.variable ?? `${ node.type }_${node.id.toString().substring(0, 8)}` }`;
+        console.log(node, `${ node.gd.type }_${node.id.toString().substring(0, 8)}`)
+        return node.gd.variable ?? `${ node.gd.type }_${node.id.toString().substring(0, 8)}`;
     }
 
     /**
@@ -142,7 +143,7 @@ export class DocassembleTransformer implements ITransformer  {
         
         const code: string[] = [];
 
-        switch(node.type) {
+        switch(node.gd.type) {
             case 'start': {
 
                 code.push(`def get_outcome_${ this.da_node_get_id(node) }():`)
@@ -169,13 +170,13 @@ export class DocassembleTransformer implements ITransformer  {
             case 'decision': {
 
                 for(const node_edge_out of node_edges_out) {            
-                    const node_edge_out_content = node_edge_out.content;
+                    const node_edge_out_content = node_edge_out.gd.content;
                     if (node_edge_out_content == null)
                         continue
 
                     const sub_node = this.da_build_logic(graph, node_edge_out.get_node_to())
 
-                    code.push(`if ${ this.da_node_get_id(node) } == '${ node_edge_out.content }':`);
+                    code.push(`if ${ this.da_node_get_id(node) } == '${ node_edge_out.gd.content }':`);
                     code.push(...indent(sub_node || ['pass'], 1))
                 }
                 
@@ -209,11 +210,11 @@ export class DocassembleTransformer implements ITransformer  {
         
         for (const node of graph.nodes) {
 
-            switch(node.type) {
+            switch(node.gd.type) {
                 case 'start':
                     blocks.push([
                         'question: Start',
-                        `subquestion: ${ node.get_content() }`,
+                        `subquestion: '${ node.get_content() }'`,
                         `continue button field: ${ this.da_node_get_id(node) }`,
                     ]);
 
@@ -228,8 +229,8 @@ export class DocassembleTransformer implements ITransformer  {
                     let buttons: Array<string> = [];
 
                     for (const edge_out of edges_out) {
-                        if (edge_out.content != null)
-                            buttons.push(`  - "${ edge_out.content }"`)
+                        if (edge_out.gd.content != null)
+                            buttons.push(`  - "${ edge_out.gd.content }"`)
                     }
 
                     // TODO: add option for priority of buttons (instead of sort)
