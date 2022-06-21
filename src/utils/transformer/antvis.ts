@@ -67,12 +67,7 @@ export class AntvisTransformer implements ITransformer {
         return graph;
     }
 
-    // out(graph: Graph) {
-    //     return;
-    // }
-
     // inspired from: https://github.com/eensander/graph-quiz/blob/master/resources/js/components/dashboard/graph/GraphModeler.vue#L525
-    // /*
     out(graph: Graph) {
 
         const data_nodes: Array<any> = [];
@@ -157,5 +152,4 @@ export class AntvisTransformer implements ITransformer {
 
         return data;
     }
-    // */
 }

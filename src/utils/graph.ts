@@ -4,7 +4,6 @@ import { node_types } from "./antv-model";
 import { Filter } from "@antv/x6/lib/registry";
 import { uuid } from "./data/uuid";
 
-// export type Id = string | number;
 export type Id = string;
 
 export interface Node {
@@ -47,16 +46,7 @@ export class Node {
         Object.assign(this, NodeDefault, options);
     }
 
-    /*
-    constructor(graph: Graph, id: Id | null = null, content = '<empty>') {
-        this.graph = graph;
-        this.id = id ?? get_id();
-
-        this.content = content;
-    }
-    */
-
-    // not sure if this is the best method
+    // not sure if this is the best method of determining the type
     is_node() { return true; }
     is_edge() { return false; }
 
@@ -167,10 +157,6 @@ class Graph {
     add_edge(options: Partial<Edge> & Pick<Edge, 'id' | 'node_from_id' | 'node_to_id' | 'gd'>) {
         this.edges.push(new Edge({...options, graph: this}))
     }
-
-    // add_node(graph: Graph, content = '<empty>') {
-    //     this.nodes.push(new Node({graph, id: get_id(), content}))
-    // }
     
     clear() {
         this.nodes = [];

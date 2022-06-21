@@ -65,11 +65,10 @@
 
 <script lang="ts" setup>
 
-    import { computed, h, onMounted, reactive, Ref, ref, VNode, watch } from 'vue';
+    import { h, onMounted, reactive, Ref, ref, VNode, watch } from 'vue';
 
     import { useToast } from "vue-toastification";
-
-    import axios from 'axios';
+    
     import { Cell, Graph } from '@antv/x6';
 
     import GraphModelerConfigBar from './GraphModelerConfigBar.vue'
@@ -78,13 +77,11 @@
     import GraphValidationErrors from './GraphValidationErrors.vue'
     
     import Transformer from '@/utils/transformer'
-    import { default_edge_label, graph_options_defaults, graph_register_defaults } from '@/utils/antv-model'
+    import { graph_options_defaults, graph_register_defaults } from '@/utils/antv-model'
     import { DocassembleTransformer, validationErrorList } from '@/utils/transformer/docassemble';
     import { Node, Edge } from '@/utils/graph';
 
     const read_more = ref(false);
-
-    const toast = useToast();
 
     onMounted(() => {
         init_modeler()
@@ -116,8 +113,6 @@
         docassemble_cont_update();
     }), { deep: true })
 
-    // type NotFunction<T> = T extends Node | Edge ? never : T;
-
     const docassemble_cont_update = () => {
         if (typeof graph.value == "undefined")
             return;
@@ -130,11 +125,7 @@
         graph.value.getCells().forEach(cell => 
             typeof cell.getData()?.errors !== 'undefined' &&
             cell.setData({'errors': false}, {no_da_update: true}));
-        
-        // graph.value.getCells().forEach(cell => console.log(typeof cell.getData()?.errors, cell.getData()));
-
-        // console.log(docassemble_validation_errors.value)
-
+         
         // this part formats the conversion errors, which contain Node and Edge 
         // objects, to a clickable span as a VNode
         formatted_validation_errors.value = docassemble_validation_errors.value.map((val_error) => {
@@ -177,11 +168,6 @@
             });
         });
 
-
-        // console.log(formatted_validation_errors.value)
-
-        // const transformer = new Transformer()).in_antv(graph.value);
-
         if(formatted_validation_errors.value.length == 0) {
             docassemble_cont.value = transformer.out_docassemble()
             if (docassemble_cont.value && docassemble_out_options.include_json_export) {
@@ -193,9 +179,6 @@
         } else {
             docassemble_cont.value = '-';
         }
-        
-        // docassemble_cont.value = JSON.stringify((new Transformer()).in_antv(graph.value).out_json());
-        // docassemble_cont.value = JSON.stringify(graph.value.toJSON());
     };
 
     const copy_button_content = ref('COPY');
@@ -204,7 +187,6 @@
         (window as any).getSelection().selectAllChildren(
             document.getElementById('docassemble_out_container')
         );
-
 
         // source: https://stackoverflow.com/a/67008779/17864167
         navigator.clipboard.writeText(docassemble_cont.value)
@@ -218,27 +200,9 @@
             console.log('Failed to copy', err);
         });
     }
-    
-    const remote_load = (remote_data: any) => {
-        // graph.value?.fromJSON((new Transformer()).in_json(remote_data).out_antv());
-    }
-
-    const local_save = () => {
-        if (typeof graph.value == "undefined")
-            return;
-        
-        new Transformer().in_antv(graph.value).out_json()
-    }
 
     const register_events = (graph: Graph) => {
-        // events
         // https://x6.antv.vision/en/docs/tutorial/intermediate/events
-
-        // if (typeof graph.value === "undefined")
-        //     return false;
-        
-        // graph.on('cell:change:*', docassemble_cont_update)
-        // graph.on('cell:change:*', ())
 
         graph.on('cell:change:*', (args) => {
             // console.log(args)
@@ -278,11 +242,6 @@
         let container = document.getElementById('modeler-container')!;
         // let container_box = document.getElementById('modeler-container-box')!;
 
-        // // for resetting
-        // // container.innerHTML = "";
-        // // container_box.innerHTML = "";
-        // // container_box.appendChild(container);
-
         let width = container.scrollWidth;
         let height = container.scrollHeight || 500;
 
@@ -296,15 +255,12 @@
             // height,
         })
 
-        // graph.value.resize()
-
         if(graph.value != undefined)
         {
             graph_register_defaults(graph.value);
             register_events(graph.value);
 
             docassemble_cont_update()
-            // window.graph_main = this.graph;
         }
 
     };

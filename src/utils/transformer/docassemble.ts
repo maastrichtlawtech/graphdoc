@@ -2,8 +2,6 @@ import { ITransformer } from ".";
 import Graph, { Edge, Node } from "../graph";
 import { indent } from "@/utils/data/indent"
 
-// export type validationErrorList = {node: {[id: string]: string[]}, edge: {[id: string]: string[]}, general: string[]};
-
 export type validationErrorPart = string | Node | Edge;
 export type validationErrorList = Array<validationErrorPart>[];
 
@@ -107,10 +105,6 @@ export class DocassembleTransformer implements ITransformer  {
             Object.entries(content_edges_out).forEach(([content, amount]) => {
                 
                 if (amount > 1) {
-                    // node_edges_out.filter(edge => edge.content = content).forEach(edge => {
-                    //     // errors.push(`decision node with label '${ node_decision.content }' has multiple edges with content '${ edge_out.content }' (should be unique)`)
-                    //     errors.push([`multiple edges with content '${ edge.content }' exist on the decision node `, node_decision])
-                    // })
                     const edges = node_edges_out.filter(edge => edge.gd.content = content);
                     const error_start: validationErrorPart[] = [
                         `the decision node `, 
@@ -127,7 +121,6 @@ export class DocassembleTransformer implements ITransformer  {
                 }
             });
         }
-
 
         // only perform cycle check if no other errors are present
         if (errors.length === 0) {

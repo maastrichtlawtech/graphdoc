@@ -100,19 +100,12 @@
 
 <script lang="ts" setup>
 
-    import { computed, onMounted, ref } from 'vue';
+    import { computed, ref } from 'vue';
     import { default_edge_label, node_types, node_type_default, AntvNodeData } from '@/utils/antv-model'
 
     import { Cell, Edge, Node } from '@antv/x6'
 
     import titleCase from '@/utils/data/titleCase';
-    
-    // const props = defineProps({
-    //     cell: {
-    //         type: Cell,
-    //         required: false
-    //     }
-    // });
 
     const props = defineProps<{
         cell: Cell | undefined
@@ -157,22 +150,6 @@
         }
     });
 
-    /*
-    const node_get_label = () => {
-        // return this.cell.store?.data?.labels?.[0] ?? '';
-        // return (props.cell as any).getLabel();
-
-        // https://github.com/antvis/X6/issues/2020#issuecomment-1104644438
-        return (props.cell as Node).getAttrByPath('text/text')
-    };
-    
-    const node_set_label = (content: string) => {
-        // (props.cell as any).setLabel(content);
-
-        (props.cell as Node).setAttrByPath('text/text', content)
-    }
-    */
-
     // only reason for 'edge_content_ref' is for adding reactivity to edge_content,
     // relevant for pressing buttons
     const edge_content_ref = ref('');
@@ -195,27 +172,6 @@
             edge.setData({value})
         }
     });
-
-    /*
-    const edge_get_label = () => {
-        const edge = props.cell as Edge;
-        return edge.getLabelAt(0)?.attrs?.text?.text ?? '';
-    };
-    */
-    
-    /*
-    const edge_set_label = (content?: string) => {
-        const edge = props.cell as Edge;
-
-        const edge_label = default_edge_label(content);
-        if (edge_label != null) {
-            edge.removeLabelAt(0);
-            edge.setLabelAt(0, edge_label);
-        }
-
-        edge.setData({content})
-    }
-    */
 
 </script>
 
