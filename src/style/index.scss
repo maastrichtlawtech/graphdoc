@@ -4,8 +4,6 @@
 
 $node_start_color: #03B54D;
 $node_decision_color: #6A7FDB;
-/* $node_notice_color: #F4D301; */
-/* $node_notice_color: #DFC201; */
 $node_notice_color: #9a969c;
 $node_end_color: #DF5361;
 
@@ -41,6 +39,34 @@ html {
 
     &.node-end {
         border-bottom: 4px solid $node_end_color;
+    }
+
+    &.node-has-errors:after {
+        content: "";
+        position: absolute;
+        height: 100%;
+        width: 20px;
+        top: 0px;
+        right: 0;
+        background-image: radial-gradient(circle at center, theme('colors.red.200') 4px, transparent 5px);
+        background-size: 20px 20px;
+        background-position: top center, bottom center;
+        background-repeat: no-repeat;
+    }
+
+    span {
+        &.node-label-variable {
+            @apply font-mono;
+            font-size: 0.85rem;
+        }
+        &.node-label-content {
+            // ...
+            @apply font-serif;
+        }
+        &.node-label-unnamed {
+            font-style: italic;
+            color:rgb(108, 108, 108);
+        }
     }
 }
 
@@ -78,5 +104,22 @@ html {
             stroke: #1890ff;
             stroke-width: 1.5px !important;
         }
+    }
+}
+
+button.btn {
+
+    &[disabled] {
+        @apply bg-gray-300 cursor-not-allowed;
+    }
+
+    @apply bg-white border border-gray-300 text-gray-800 px-3 py-1 rounded-md font-normal;
+
+    i {
+        @apply mr-2 text-lg leading-none;
+    }
+
+    &:hover {
+        @apply ring-4 ring-gray-200 border-gray-400 cursor-pointer ;
     }
 }

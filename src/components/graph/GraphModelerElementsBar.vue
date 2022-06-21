@@ -17,8 +17,8 @@
         -->
 
         <div v-for="(node_type, node_type_name) of node_types" 
-            :key="node_type_name" 
-            class="shape cursor-move p-2 bg-blue-200 border-b border-gray-400 my-1" 
+            :key="node_type_name"
+            :class="`node node-${node_type_name}`"
             :data-type="node_type_name"
             @mousedown="startDrag($event)">
             {{ node_type_name }}
@@ -35,7 +35,7 @@
     import { Dnd } from '@antv/x6/lib/addon/dnd';
     
     import { onMounted, Ref, ref, watch, computed } from 'vue';
-    import { graph_options_defaults, node_types } from '@/utils/model';
+    import { graph_options_defaults, node_types } from '@/utils/antv-model';
 
     const props = defineProps<{
         graph: Graph | undefined,
@@ -158,6 +158,22 @@
 
         .shape {
             @apply mb-1 p-2 bg-gray-200 border-gray-300 border-b-2 border-t;
+        }
+
+        .node {
+            // @apply cursor-move text-gray-800 mx-1 mb-2 py-1.5 w-0;
+            @apply cursor-move text-gray-600 mb-2  ;
+
+            width: initial; 
+            padding: 0.375rem 0.5rem;
+
+            border-radius: 0;
+            border-left: 0;
+            border-right: 0;
+
+            &:hover {
+                @apply text-gray-900;
+            }
         }
 
     }

@@ -9,7 +9,7 @@
     <div v-else-if="cell.isNode()" class="w-full">
     
         <div class="">
-            <span class="m-2 font-bold block text-2xl border-b border-gray-300">Node: {{ (cell as any).store.data.data.node_type }}</span>
+            <span class="m-2 font-bold block text-2xl border-b border-gray-300">{{ titleCase((cell.data as AntvNodeData).gd.type) }} node</span>
             
             <div class="p-2">
                 <button @click="cell?.remove()" class="action-btn-remove">Remove</button>
@@ -20,18 +20,27 @@
                     <span class="my-2 block border-b border-gray-300 uppercase font-bold text-sm text-gray-800">{{ field_group }}</span>
 
                     <div v-for="field in fields" :key="field" class="block mt-2 mb-1 ">
+                    
+                        <label v-if="field == 'variable'">
+                            <span class="text-gray-700 block mb-1">Variable</span>
+                            <div>
+                                <!-- <input class="w-full" type="text" :placeholder="cell.id" v-model="node_variable" /> -->
+                                <input class="w-full" type="text" v-model="node_variable" />
+                            </div>
+                        </label>
+
                         <label v-if="field == 'label'">
-                            <span class="text-gray-700 block mb-1">Label</span>
-                            <!-- <input class="w-full" type="text" v-model="cell.label" /> -->
+                            <span class="text-gray-700 block mb-1">Content</span>
                             <div>
                                 <textarea 
                                     style="min-height: 3rem;"
                                     class="w-full"
                                     type="text"
-                                    v-model="node_label" 
+                                    v-model="node_content" 
                                 />
                             </div>
                         </label>
+
                         <!-- 
                         <label v-else-if="field == 'annotation'">
                             <span class="text-gray-700 block mb-1">Annotation</span>
@@ -39,10 +48,10 @@
                             <textarea style="min-height: 3rem;" class="w-full" type="text" v-model="cell.store.data.data.options.annotation" />
                         </label>
                         -->
-
+                        <!--
                         <span v-else>
                             <span class="text-gray-700 block mb-1">Undefined field: {{ field.charAt(0).toUpperCase() + field.slice(1) }}</span>
-                        </span>
+                        </span> -->
                     </div>
                 </div>
             </div>
@@ -59,20 +68,25 @@
                 <button @click="cell?.remove()" class="action-btn-remove">Remove</button>
             </div>
 
-            <div class="p-2">
+            <div class="p-2" v-if="(cell.getSourceCell()?.getData() as AntvNodeData).gd.type == 'decision'">
                 <span class="my-2 block border-b border-gray-300 uppercase font-bold text-sm text-gray-800">General</span>
 
-                <div class="block mt-2 mb-1 ">
+                <div class="block mt-2">
                     <label>
                         <span class="text-gray-700 block mb-1">Label</span>
                         <input
                             type="text"
                             class="w-full"
-                            :value="edge_get_label(cell)" 
-                            @input="event => edge_set_label((event.target as HTMLInputElement).value)" />
+                            v-model="edge_content" />
                     </label>
+                    <div class="w-full my-2 text-right">
+                        <button class="inline btn mr-2" @click="edge_content = 'Yes'">Yes</button>
+                        <button class="inline btn" @click="edge_content = 'No'">No</button>
+                    </div>
                 </div>
 
+                <!-- <span class="my-2 block border-b border-gray-300 uppercase font-bold text-sm text-gray-800">Appearance</span>
+                <span class="text-gray-700 block mb-1">Nothing here yet</span> -->
             </div>
 
         </div>
@@ -87,10 +101,12 @@
 <script lang="ts" setup>
 
     import { computed, onMounted, ref } from 'vue';
-    import { default_edge_label, node_types, node_type_default } from '@/utils/model'
+    import { default_edge_label, node_types, node_type_default, AntvNodeData } from '@/utils/antv-model'
 
     import { Cell, Edge, Node } from '@antv/x6'
 
+    import titleCase from '@/utils/data/titleCase';
+    
     // const props = defineProps({
     //     cell: {
     //         type: Cell,
@@ -101,15 +117,6 @@
     const props = defineProps<{
         cell: Cell | undefined
     }>();
-
-    onMounted(() => {
-        // axios.get(route('dashboard.graph.index.json')).then((resp) => {
-        //     this.subgraph_options = resp.data.graphs;
-        // });
-    })
-
-    // const null_value = null;
-    // const subgraph_options = ref(null);
     
     const current_fields = computed(() => {
         const field = props.cell?.getData()?.node_type ?? node_type_default;
@@ -127,17 +134,26 @@
         )
     });
 
-    const node_label = computed({
+    const node_content = computed({
         get() {
             // https://github.com/antvis/X6/issues/2020#issuecomment-1104644438
             // return (props.cell as Node).getAttrByPath('text/text') as string
 
-            return (props.cell as Node).getData().label ?? '';
+            return (props.cell as Node).getData().gd.content ?? '';
         },
         set(value: string) {
             // (props.cell as Node).setAttrByPath('text/text', value)
 
-            (props.cell as Node).setData({label: value});
+            (props.cell as Node).setData({gd: {content: value}});
+        }
+    });
+
+    const node_variable = computed({
+        get() {
+            return ((props.cell as Node).getData() as AntvNodeData).gd.variable ?? '';
+        },
+        set(value: string) {
+            (props.cell as Node).setData({gd: {variable: value != '' ? value : null}});
         }
     });
 
@@ -157,29 +173,49 @@
     }
     */
 
+    // only reason for 'edge_content_ref' is for adding reactivity to edge_content,
+    // relevant for pressing buttons
+    const edge_content_ref = ref('');
+    const edge_content = computed({
+        get() {
+            const edge = props.cell as Edge;
+            edge_content_ref.value;
+            return edge.getLabelAt(0)?.attrs?.text?.text?.toString() ?? '';
+        },
+        set(value: string) {
+            const edge = props.cell as Edge;
+
+            const edge_label = default_edge_label(value);
+            if (edge_label != null) {
+                edge.removeLabelAt(0);
+                edge.setLabelAt(0, edge_label);
+            }
+
+            edge_content_ref.value = value;
+            edge.setData({value})
+        }
+    });
+
+    /*
     const edge_get_label = () => {
-        // return this.cell.store?.data?.labels?.[0] ?? '';
-        
-        // console.log(props.cell);
-        return (props.cell as Edge).getLabelAt(0)?.attrs?.text?.text ?? '';
-        // return props.cell?.getData()?.labels?.[0].attrs.text.text ?? '';
-        
-        // return (props.cell as any).getLabels()[0] ?? ''
+        const edge = props.cell as Edge;
+        return edge.getLabelAt(0)?.attrs?.text?.text ?? '';
     };
+    */
     
+    /*
     const edge_set_label = (content?: string) => {
-        // (props.cell as any).setLabels(content)
+        const edge = props.cell as Edge;
 
         const edge_label = default_edge_label(content);
         if (edge_label != null) {
-            (props.cell as Edge).removeLabelAt(0);
-            (props.cell as Edge).setLabelAt(0, edge_label);
+            edge.removeLabelAt(0);
+            edge.setLabelAt(0, edge_label);
         }
 
-        (props.cell as Edge).setData({content})
-
-        // console.log("CELL DATA", props.cell)
+        edge.setData({content})
     }
+    */
 
 </script>
 

@@ -1,8 +1,10 @@
 
-import { Cell, Graph, Node, Path } from '@antv/x6';
+import { Cell, Graph, Node as AntvNode, Path } from '@antv/x6';
 import { Options } from '@antv/x6/lib/graph/options';
 
-import '@antv/x6-vue-shape'
+import { Node, NodeDefault } from './graph';
+
+// import '@antv/x6-vue-shape'
 
 export const default_edge_label = (text: string | null = '') => {
     if (text == null)
@@ -145,7 +147,7 @@ export function graph_register_defaults(graph: Graph) {
     graph.on('node:mouseleave', ({ cell }) => {
         setTimeout(() => {
             cell.removeTool('button-remove')
-        }, 500)
+        }, 1000)
     })
 
     Graph.registerConnector('algo-connector', (s, e) => {
@@ -172,18 +174,42 @@ const default_port_groups = {
         attrs: {
             circle: {
                 r: 6,
+                stroke: "#6a6a6b",
                 magnet: true,
             }
         },
+        // markup: {
+        //     tagName: 'path',
+        //     selector: 'path',
+        //     attrs: {
+        //         d: "M 0 5 L 6.25 -5 L -6.25 -5 L 0 5",
+        //         fill: "#fff",
+        //         stroke: "#6a6a6b",
+        //         'stroke-width': "1",
+        //         magnet: true
+        //     }
+        // },
         position: 'top'
     },
     out: {
         attrs: {
             circle: {
                 r: 6,
+                stroke: "#6a6a6b",
                 magnet: true,
             }
         },
+        // markup: {
+        //     tagName: 'path',
+        //     selector: 'path',
+        //     attrs: {
+        //         d: "M 0 -5 L 6.25 5 L -6.25 5 L 0 -5",
+        //         fill: "#fff",
+        //         stroke: "#6a6a6b",
+        //         'stroke-width': "1",
+        //         magnet: true
+        //     }
+        // },
         position: 'bottom'
     },
 }
@@ -208,7 +234,7 @@ export type node_types = {
     [
         key in "start" | "notice" | "decision" | "end"
     ]: {
-        antv_metadata: Node.Metadata,
+        antv_metadata: Omit<AntvNode.Metadata, 'data'> & {data: Partial<AntvNodeData>}, // override 'data' type of antv
         config_fields: {
             general?: string[],
             additional?: string[]
@@ -217,39 +243,44 @@ export type node_types = {
 };
 export const node_type_default = 'notice';
 
-Graph.registerNode("vue-start", {
-    inherit: "vue-shape",
-    // x: 200,
-    // y: 150,
-    width: 300,
-    height: 20,
-    component: {
-        template: `<div>{{ node.getData().label }}</div>`,
-        inject: ["getGraph", "getNode"],
-        data() {
-            return {
-                node: null
-            }
-        },
-        mounted() {
-            const node = this.getNode()
-        }
-    },
-});
+// export type AntvNodeData = Partial<Node> & Pick<Node, 'type' | 'options' | 'variable' | 'content'>;
+// export type AntvNodeData = Pick<Node, 'type' | 'options' | 'variable' | 'content'> 
+//     & { errors?: boolean };
+export type AntvNodeData = {
+    errors?: boolean,
+    // gd for 'graphdoc' model
+    // gd: Partial<Node> & Pick<Node, 'type' | 'options' | 'variable' | 'content'> 
+    // Partial<Pick<...>> are optional data entries, Pick<...> are required.
+    // gd: Partial<Pick<Node, 'options'>> & Pick<Node, 'type' | 'variable' | 'content'> 
 
-
-import start from '@/components/graph/nodes/start.vue'
+    gd: Node['gd']
+}
 
 const node_html = {
-    render(node: Node) {
-        const data = node.getData() as any
+    render(node: AntvNode) {
+        const data = node.getData() as AntvNodeData;
+
+        let label = '';
+        let label_class = '';
+
+        if (data.gd.variable) {
+            label = data.gd.variable;
+            label_class = 'node-label-variable';
+        } else if (data.gd.content) {
+            label = `"${data.gd.content}"`;
+            label_class = 'node-label-content';
+        } else {
+            label = `unnamed ${data.gd.type} node`;
+            label_class = 'node-label-unnamed';
+        }
+
         return(
-            `<div class="node node-${ data.node_type }">
-                <span>${ data.label ?? '' }</span>
+            `<div class="node node-${ data.gd.type } ${ data.errors ? 'node-has-errors' : '' }">
+                <span class="${ label_class }">${ label }</span>
             </div>`
         )
     },
-    shouldComponentUpdate(node: Node) {
+    shouldComponentUpdate(node: AntvNode) {
         return node.hasChanged('data')
     },
 }
@@ -264,14 +295,16 @@ export const node_types: node_types = {
             width: 180,
             height: 36,
             data: {
-                node_type: 'start',
-                options: {}
+                gd: Object.assign({}, NodeDefault.gd, {
+                    type: 'start'
+                }),
             },
             ports: default_node_ports(['out']),
         },
         config_fields: {
             general: [
-                'label'
+                'variable',
+                'label',
             ],
             additional: [
                 // 'annotation'
@@ -287,14 +320,16 @@ export const node_types: node_types = {
             height: 36,
 
             data: {
-                node_type: 'decision',
-                options: {}
+                gd: Object.assign({}, NodeDefault.gd, {
+                    type: 'decision'
+                }),
             },
             ports: default_node_ports(['in', 'out']),
         },
         config_fields: {
             general: [
-                'label'
+                'variable',
+                'label',
             ],
             additional: [
                 // 'annotation',
@@ -311,14 +346,16 @@ export const node_types: node_types = {
             height: 36,
             
             data: {
-                node_type: 'notice',
-                options: {}
+                gd: Object.assign({}, NodeDefault.gd, {
+                    type: 'notice'
+                }),
             },
             ports: default_node_ports(['in', 'out']),
         },
         config_fields: {
             general: [
-                'label'
+                'variable',
+                'label',
             ],
             additional: [
                 // 'annotation'
@@ -334,154 +371,17 @@ export const node_types: node_types = {
             height: 36,
             
             data: {
-                node_type: 'end',
-                options: {}
+                gd: Object.assign({}, NodeDefault.gd, {
+                    type: 'end'
+                }),
             },
             ports: default_node_ports(['in']),
         },
         config_fields: {
             general: [
-                'label'
+                'variable',
+                'label',
             ],
         }
     }
 }
-
-
-/*
-export const node_types: node_types = {
-    // https://github.com/eensander/graph-quiz/blob/master/resources/js/components/dashboard/graph/GraphModeler.vue#L112
-    start: {
-        antv_metadata: {
-            shape: 'test-vue-shape',
-            tools: ['button-remove'],
-            width: 100,
-            height: 40,
-            attrs: {
-                body: {
-                    fill: '#FDE68A', // reference tailwind-css's default colors
-                    stroke: '#78350F',
-                    strokeWidth: 1,
-                },
-                label: {
-                    fill: '#78350F',
-                    fontSize: 13,
-                    textWrap: { width: -10 }
-                },
-            },
-            data: {
-                node_type: 'start',
-                options: {}
-            },
-            ports: default_node_ports(['out']),
-        },
-        config_fields: {
-            general: [
-                'label'
-            ],
-            additional: [
-                // 'annotation'
-            ],
-        }
-    },
-    decision: {
-        antv_metadata: {
-            shape: 'polygon',
-            tools: ['button-remove'],
-            width: 100,
-            height: 80,
-            // https://x6.antv.vision/zh/examples/node/native-node#polygon
-            points: '0,10 10,0 20,10 10,20',
-            attrs: {
-                body: {
-                    fill: '#93C5FD', // reference tailwind-css's default colors
-                    stroke: '#1E3A8A',
-                    strokeWidth: 1,
-                },
-                label: {
-                    fill: '#1E3A8A',
-                    fontSize: 13,
-                    textWrap: { width: 100 }
-                },
-            },
-            data: {
-                node_type: 'decision',
-                options: {}
-            },
-            ports: default_node_ports(['in', 'out']),
-        },
-        config_fields: {
-            general: [
-                'label'
-            ],
-            additional: [
-                // 'annotation',
-                // 'subgraph'
-            ],
-        }
-    },
-    notice: {
-        antv_metadata: {
-            shape: 'rect',
-            tools: ['button-remove'],
-            width: 100,
-            height: 40,
-            attrs: {
-                body: {
-                    fill: '#A7F3D0', // reference tailwind-css's default colors
-                    stroke: '#064E3B',
-                    strokeWidth: 1,
-                },
-                label: {
-                    fill: '#064E3B',
-                    fontSize: 13,
-                    textWrap: { width: -10 }
-                }
-            },
-            data: {
-                node_type: 'notice',
-                options: {}
-            },
-            ports: default_node_ports(['in', 'out']),
-        },
-        config_fields: {
-            general: [
-                'label'
-            ],
-            additional: [
-                // 'annotation'
-            ],
-        }
-    },
-    end: {
-        antv_metadata: {
-            shape: 'ellipse',
-            tools: ['button-remove'],
-            width: 100,
-            height: 40,
-            attrs: {
-                body: {
-                    fill: '#FECACA', // reference tailwind-css's default colors
-                    stroke: '#7F1D1D',
-                    strokeWidth: 1,
-                },
-                label: {
-                    fill: '#7F1D1D',
-                    fontSize: 13,
-                    textWrap: { width: -10 }
-                },
-            },
-            data: {
-                node_type: 'end',
-                options: {}
-            },
-            ports: default_node_ports(['in']),
-        },
-        config_fields: {
-            general: [
-                'label'
-            ],
-        }
-    }
-}
-*/

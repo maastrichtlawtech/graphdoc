@@ -1,36 +1,48 @@
-import { node_types } from "./model";
+// This file is basically 'graphdoc-model'
+
+import { node_types } from "./antv-model";
 import { Filter } from "@antv/x6/lib/registry";
 import { uuid } from "./data/uuid";
 
-export type Id = string | number;
+// export type Id = string | number;
+export type Id = string;
 
 export interface Node {
     graph: Graph
     id: Id,
 
-    type: keyof node_types,
-    content: string,
-    options: {[key: string]: any},
+    gd: {
+        type: keyof node_types,
+        variable?: string | null,
+        content?: string | null,
+    }
+    // content: {[lang: string]: string}, // for multilang support
+    
+    // options: {[key: string]: any},
     appearance: {
         x: number, y: number,
         width: number, height: number,
     },
 }
 
-export const NodeDefault = {
+export const NodeDefault: Partial<Node> = {
     appearance: {
         x: 0, y: 0,
         width: 100, height: 100
     },
-    options: {},
-    content: '<empty>',
-    type: 'notice'
+    gd: {
+        type: 'notice', // notice is most generic
+        content: null,
+        variable: null
+    },
 }
 
 export class Node {
 
     constructor(options: Partial<Node> & Pick<Node, 'graph'>) {
-        options.id = options.id ?? uuid()
+        if (typeof options.id == "undefined")
+            options.id = uuid();
+        // options.variable = `${options.id}`;
 
         Object.assign(this, NodeDefault, options);
     }
@@ -44,6 +56,18 @@ export class Node {
     }
     */
 
+    // not sure if this is the best method
+    is_node() { return true; }
+    is_edge() { return false; }
+
+    get_label() {
+        return this.gd.variable ?? this.gd.content ?? this.id.substring(0, 8);
+    }
+    
+    get_content() {
+        return this.gd.content ?? `[content of node ${ this.id.substring(0, 8) }]`
+    }
+ 
     get_edges_in() {
         return this.graph.edges
             .filter(edge => edge.node_to_id == this.id)
@@ -77,17 +101,15 @@ export interface Edge {
     node_from_id: Id,
     node_to_id: Id,
     
-    content: string | null,
+    gd: {
+        content: string | null,
+    }
 }
 
-export const EdgeDefault = {
-    appearance: {
-        x: 0, y: 0,
-        width: 100, height: 100
-    },
-    options: {},
-    content: '<empty>',
-    type: 'notice'
+export const EdgeDefault: Partial<Edge> = {
+    gd: {
+        content: null,
+    }
 }
 
 export class Edge {
@@ -108,6 +130,10 @@ export class Edge {
         this.content = content;
     }
 */
+
+    is_node() { return false; }
+    is_edge() { return true; }
+
     get_node_from() {
         return this.graph.nodes
             .filter(node => node.id == this.node_from_id)[0]
@@ -130,15 +156,15 @@ class Graph {
     }
 
     get_nodes_by_type(type: keyof node_types) {
-        return this.nodes.filter(x => x.type == type) ?? [];
+        return this.nodes.filter(x => x.gd.type == type) ?? [];
     }
 
     // add_node(options: Partial<Node>) {
-    add_node(options: Partial<Node> & Pick<Node, 'id' | 'content' | 'type' | 'appearance'>) {
+    add_node(options: Partial<Node> & Pick<Node, 'id' | 'appearance' | 'gd'>) {
         this.nodes.push(new Node({...options, graph: this}))
     }
 
-    add_edge(options: Partial<Edge> & Pick<Edge, 'id' | 'node_from_id' | 'node_to_id' | 'content'>) {
+    add_edge(options: Partial<Edge> & Pick<Edge, 'id' | 'node_from_id' | 'node_to_id' | 'gd'>) {
         this.edges.push(new Edge({...options, graph: this}))
     }
 
