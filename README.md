@@ -2,7 +2,7 @@
 
 ## Introduction
 
-GraphDoc is a web-application that has been developed on behalf of the [Maastricht Law & Tech Lab](https://github.com/maastrichtlawtech/), which is part of Maastricht University in The Netherlands.
+GraphDoc is a web-application that has been developed by [Sander van Essel](https://github.com/eensander) as part of an internship for the [Maastricht Law & Tech Lab](https://github.com/maastrichtlawtech/), which is part of Maastricht University, The Netherlands.
 
 The goal of this application is to aid users in visually constructing [Docassemble](https://github.com/jhpyle/docassemble/) interview configuration files.
 
