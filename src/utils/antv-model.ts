@@ -270,7 +270,8 @@ const node_html = {
             label = `"${data.gd.content}"`;
             label_class = 'node-label-content';
         } else {
-            label = `unnamed ${data.gd.type} node`;
+            // label = `unnamed ${data.gd.type} node`;
+            label = `${ data.gd.type }_${node.id.toString().substring(0, 8)}`;
             label_class = 'node-label-unnamed';
         }
 

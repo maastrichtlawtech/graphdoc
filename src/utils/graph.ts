@@ -51,7 +51,8 @@ export class Node {
     is_edge() { return false; }
 
     get_label() {
-        return this.gd.variable ?? this.gd.content ?? this.id.substring(0, 8);
+        // return this.gd.variable ?? this.gd.content ?? this.id.substring(0, 8);
+        return this.gd.variable ?? this.gd.content ?? `${ this.gd.type }_${this.id.toString().substring(0, 8)}`;
     }
     
     get_content() {
