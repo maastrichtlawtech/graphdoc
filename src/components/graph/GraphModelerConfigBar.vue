@@ -25,7 +25,7 @@
                             <span class="text-gray-700 block mb-1">Variable</span>
                             <div>
                                 <!-- <input class="w-full" type="text" :placeholder="cell.id" v-model="node_variable" /> -->
-                                <input class="w-full" type="text" v-model="node_variable" />
+                                <input class="w-full" type="text" v-model="node_variable" :placeholder="`${ (cell.getData() as AntvNodeData).gd.type }_${cell.id.toString().substring(0, 8)}`" />
                             </div>
                         </label>
 
