@@ -1,11 +1,15 @@
 <template>
 
     <!-- <div class="border border-gray-500 rounded mt-4 mb-2 py-2 px-3" :class="{ 'bg-red-50': props.formatted_validation_errors.length > 0 }"> -->
-    <div class="overflow-hidden rounded-lg border border-slate-900/20 hover:border-slate-900/30 hover:shadow-sm transition ease-in-out mt-4 mb-2 py-2 px-3" :class="{ 'bg-red-50': props.formatted_validation_errors.length > 0 }">
+    <div class="overflow-hidden rounded-lg border hover:shadow-sm transition ease-in-out mt-4 mb-2 py-2 px-4"
+        :class="{
+            'bg-red-50 border-red-900/20 hover:border-red-900/30': props.formatted_validation_errors.length > 0,
+            'bg-sky-100/10 border-sky-900/20 hover:border-sky-900/30': !(props.formatted_validation_errors.length > 0),
+        }">
         <template v-if="props.formatted_validation_errors.length > 0">
-            <span class="block font-medium mb-2">Validation errors</span>
+            <span class="block font-semibold mb-1 text-red-900">There are {{props.formatted_validation_errors.length}} errors in your graph</span>
             <ul class="list-disc list-inside">
-                <li class="validation-error text-red-900" v-for="(validation_error, vei) in props.formatted_validation_errors" :key="vei">
+                <li class="validation-error text-red-800" v-for="(validation_error, vei) in props.formatted_validation_errors" :key="vei">
                     <!-- {{ validation_error }} -->
                     <template v-for="err_part in validation_error" :key="err_part">
                         <component v-if="(err_part as any).__v_isVNode ?? false" :is="err_part" />
@@ -14,7 +18,7 @@
                 </li>
             </ul>
         </template>
-        <span v-else class="block text-green-800">Graph contains no errors</span>
+        <span v-else class="block text-sky-800">Graph contains no errors</span>
     </div>
 
 </template>
