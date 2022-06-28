@@ -54,7 +54,6 @@ export class DocassembleTransformer implements ITransformer  {
 
         // Checking variable names: duplicate and invalid names
         for (const [variable, {amount, nodes}] of Object.entries(variable_list)) {
-            console.log(variable, amount, nodes)
 
             const seperated_error_nodes: (string | Node)[] = [];
             nodes.forEach((node, i) => {
@@ -131,7 +130,6 @@ export class DocassembleTransformer implements ITransformer  {
             const S = graph.nodes.filter(x => x.get_edges_in().length === 0);
 
             let edges = [...graph.edges]
-            // console.log(edges);
 
             while (S.length > 0) {
                 const n = S.pop()!;
@@ -156,7 +154,6 @@ export class DocassembleTransformer implements ITransformer  {
     
     da_node_get_id(node: Node): string {
         // return `${ node.type }_${ node.variable }`
-        // console.log(node, `${ node.gd.type }_${node.id.toString().substring(0, 8)}`)
         return node.gd.variable ?? `${ node.gd.type }_${node.id.toString().substring(0, 8)}`;
     }
     

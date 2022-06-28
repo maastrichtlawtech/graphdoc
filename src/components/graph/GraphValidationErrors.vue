@@ -1,6 +1,7 @@
 <template>
 
-    <div class="border border-gray-500 rounded mt-4 mb-2 py-2 px-3" :class="{ 'bg-red-50': props.formatted_validation_errors.length > 0 }">
+    <!-- <div class="border border-gray-500 rounded mt-4 mb-2 py-2 px-3" :class="{ 'bg-red-50': props.formatted_validation_errors.length > 0 }"> -->
+    <div class="overflow-hidden rounded-lg border border-slate-900/20 hover:border-slate-900/30 hover:shadow-sm transition ease-in-out mt-4 mb-2 py-2 px-3" :class="{ 'bg-red-50': props.formatted_validation_errors.length > 0 }">
         <template v-if="props.formatted_validation_errors.length > 0">
             <span class="block font-medium mb-2">Validation errors</span>
             <ul class="list-disc list-inside">

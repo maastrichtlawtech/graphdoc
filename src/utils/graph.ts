@@ -138,7 +138,7 @@ export class Edge {
 }
 
 class Graph {
-    name;
+    name: string;
     nodes: Array<Node> = [];
     edges: Array<Edge> = [];
 
