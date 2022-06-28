@@ -31,11 +31,11 @@
 <script lang="ts" setup>
     // https://github.com/antvis/X6/blob/master/sites/x6-sites-demos/packages/tutorial/basic/dnd/dnd/src/app.tsx
 
-    import { Dom, Addon, Graph, Node } from '@antv/x6';
+    import { Addon, Graph } from '@antv/x6';
     import { Dnd } from '@antv/x6/lib/addon/dnd';
     
-    import { onMounted, Ref, ref, watch, computed } from 'vue';
-    import { graph_options_defaults, node_types } from '@/utils/antv-model';
+    import { onMounted, Ref, ref, watch } from 'vue';
+    import { node_types } from '@/utils/antv-model';
 
     const props = defineProps<{
         graph: Graph | undefined,
@@ -51,11 +51,6 @@
         // console.log(dnd.value);
     })
 
-    // computed(() => {
-    //     if (typeof props.graph !== "undefined")
-    //         init_dnd(props.graph)
-    // })
-
     watch(() => props.graph, (value: typeof props.graph) => {
         if (typeof value !== "undefined")
             init_dnd(value)
@@ -68,22 +63,11 @@
             target: graph,
             scaled: false,
             animation: true,
-            validateNode(droppingNode, options) {
-                // alert('validating')
+            validateNode(droppingNode) {
+                droppingNode.updateData({'is_stencil_node': undefined});
                 return true;
-                // return droppingNode.shape === 'html'
-                //   ? new Promise<boolean>((resolve) => {
-                //       const { draggingNode, draggingGraph } = options;
-                //       const view = draggingGraph.findView(draggingNode)
-                //       const contentElem = view.findOne('foreignObject > body > div');
-                //       Dom.addClass(contentElem, 'validating')
-                //       setTimeout(() => {
-                //         Dom.removeClass(contentElem, 'validating')
-                //         resolve(true)
-                //       }, 3000)
-                //     })
-                //   : true
             },
+            
         })
     }
     
@@ -142,7 +126,7 @@
         
         // (node as any).setLabel(type)
         // node.setAttrByPath('text/text', type)
-        node.setData({label: type})
+        node.setData({label: type, is_stencil_node: true})
         
         dnd.value?.start(node, e)
 

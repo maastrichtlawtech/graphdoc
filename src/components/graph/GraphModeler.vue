@@ -28,7 +28,9 @@
             </p>
         </div>
     </div>
-    <div class="border border-gray-400 rounded overflow-hidden">
+    <!-- <div class="border border-gray-400 rounded overflow-hidden"> -->
+    <!-- <div class="overflow-hidden rounded-lg ring-1 ring-slate-300"> -->
+    <div class="overflow-hidden rounded-lg border border-slate-900/20 hover:shadow-sm hover:border-slate-900/30 transition ease-in-out">
         <div class="w-full bg-gray-100">
             <GraphModelerToolbar
                 :graph="graph" 
@@ -40,7 +42,7 @@
             <div class="w-20 flex-initial bg-gray-100 border-t  border-gray-200">
                 <GraphModelerElementsBar v-if="graph !== null" :graph="graph"></GraphModelerElementsBar>
             </div>
-            <div id="modeler-container-box" class="flex flex-grow border-4 border-b-0 border-gray-300" >
+            <div id="modeler-container-box" class="flex flex-grow border-b-0 border-gray-300/90" style="border-width: 3px;">
             <!-- <div id="modeler-container-box" class="flex  w-full h-full" > -->
                 <!-- <div id="modeler-container" class="relative h-full"></div> -->
                 <!-- <div id="modeler-container" class="relative h-full flex-grow border-4 border-b-0 border-gray-300" style="flex: 1"></div> -->
@@ -224,6 +226,8 @@
             }
         })
 
+        graph.on('node:moved', docassemble_cont_update)
+
         graph.on('cell:removed', docassemble_cont_update)
         graph.on('cell:added', docassemble_cont_update)
 
@@ -304,7 +308,8 @@
     height: 1.125rem;
 
     &:hover {
-        fill: #1B1F23;
+        // fill: #1B1F23;
+        @apply fill-gray-700;
     }
 }
 </style>

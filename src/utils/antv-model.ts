@@ -248,12 +248,9 @@ export const node_type_default = 'notice';
 //     & { errors?: boolean };
 export type AntvNodeData = {
     errors?: boolean,
-    // gd for 'graphdoc' model
-    // gd: Partial<Node> & Pick<Node, 'type' | 'options' | 'variable' | 'content'> 
-    // Partial<Pick<...>> are optional data entries, Pick<...> are required.
-    // gd: Partial<Pick<Node, 'options'>> & Pick<Node, 'type' | 'variable' | 'content'> 
+    is_stencil_node?: boolean,
 
-    gd: Node['gd']
+    gd: Node['gd'],
 }
 
 const node_html = {
@@ -269,6 +266,9 @@ const node_html = {
         } else if (data.gd.content) {
             label = `"${data.gd.content}"`;
             label_class = 'node-label-content';
+        } else if (data.is_stencil_node ?? false) {
+            label = `new ${data.gd.type} node`;
+            label_class = 'node-label-unnamed';
         } else {
             // label = `unnamed ${data.gd.type} node`;
             label = `${ data.gd.type }_${node.id.toString().substring(0, 8)}`;
