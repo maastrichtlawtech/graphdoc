@@ -157,6 +157,18 @@ export class DocassembleTransformer implements ITransformer  {
         return node.gd.variable ?? `${ node.gd.type }_${node.id.toString().substring(0, 8)}`;
     }
     
+    da_node_escaped_markdown(node: Node): string {
+        if (!node.gd.content)
+            return `'[content of node ${ node.id.substring(0, 8) }]'`;
+
+        const lines = node.gd.content.split(/\r?\n/);
+        const escaped = [];
+        for (const line of lines) {
+            escaped.push(`${line}`);
+        }
+        return "|\n".concat(indent(escaped).join("\n"));
+    }
+    
     /**
      * Construct python code block for docassemble, from given graph and node
      * Performs recursive preorder depth-first search
@@ -230,7 +242,7 @@ export class DocassembleTransformer implements ITransformer  {
                 case 'start':
                     blocks.push([
                         'question: Start',
-                        `subquestion: '${ node.get_content() }'`,
+                        `subquestion: ${ this.da_node_escaped_markdown(node) }`,
                         `continue button field: ${ this.da_node_get_id(node) }`,
                     ]);
 
@@ -239,7 +251,7 @@ export class DocassembleTransformer implements ITransformer  {
                     blocks.push([
                         `event: ${ this.da_node_get_id(node) }`,
                         'question: End',
-                        `subquestion: '${ node.get_content() }'`,
+                        `subquestion: ${ this.da_node_escaped_markdown(node) }`,
                     ]);
 
                     break
@@ -263,7 +275,7 @@ export class DocassembleTransformer implements ITransformer  {
 
                     blocks.push([
                         'question: Question',
-                        `subquestion: '${ node.get_content() }'`,
+                        `subquestion: ${ this.da_node_escaped_markdown(node) }`,
                         `field: ${ this.da_node_get_id(node) }`,
                         ...buttons
                     ]);
@@ -273,7 +285,7 @@ export class DocassembleTransformer implements ITransformer  {
                 case 'notice': {
                     blocks.push([
                         'question: Notice',
-                        `subquestion: '${ node.get_content() }'`,
+                        `subquestion: ${ this.da_node_escaped_markdown(node) }`,
                         `continue button field: ${ this.da_node_get_id(node) }`,
                     ]);
 

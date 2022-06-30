@@ -8,7 +8,7 @@ module.exports = {
   },
   plugins: [
     require('@tailwindcss/forms')({
-      strategy: 'base'
+      strategy: 'base',
     }),
   ],
 }

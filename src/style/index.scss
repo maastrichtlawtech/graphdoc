@@ -1,11 +1,4 @@
-// There are problems with the specificity of the toastui-toolbar buttons and
-// tailwindcss's preflight button specification. The following is the only
-// current 'solution' to this.
-
-/* @tailwind base; */
-@import "~tailwindcss/lib/css/preflight.css";
-@import "~@toast-ui/editor/dist/toastui-editor.css";
-
+@tailwind base;
 @tailwind components;
 @tailwind utilities;
 
@@ -17,6 +10,16 @@ $node_end_color: #DF5361;
 html {
     // to prevent 'jumping' of content when overflow occurs
     overflow-y: scroll;
+}
+
+textarea.style-soft {
+    @apply block shadow-sm focus:ring-blue-500 focus:border-blue-500;
+    @apply sm:text-sm border border-gray-300 rounded-md;
+}
+
+input[type="text"].style-soft {
+    @apply flex-1 block w-full rounded-none rounded-md sm:text-sm border-gray-300;
+    @apply focus:ring-blue-500 focus:border-blue-500;
 }
 
 .node {
