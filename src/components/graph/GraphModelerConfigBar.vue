@@ -1,13 +1,10 @@
 <template>
 
-    <!-- <span>{{ cell }}</span> -->
-
     <div v-if="cell == null">
         <span class="block p-2 text-gray-700">Select a node or edge to configure</span>
     </div>
 
     <div v-else-if="cell.isNode()" class="w-full">
-
 
         <ModalComponent :modal="modal_field_content" v-if="modal_field_content.is_open">
             <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
@@ -15,23 +12,30 @@
                     <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">Edit content</h3>
                     <div class="mt-2">
                         <p class="text-sm text-gray-500">
-                            You can use <a href="https://commonmark.org/help/">markdown</a> to add styles to the content displayed for this node. 
+                            You can use <a href="https://commonmark.org/help/" target="_blank">markdown</a> to add styles to the content displayed for this node. 
                             Text containing HTML code will be rendered as HTML.
+                            <span 
+                                class="ml-1 text-sm text-gray-800 cursor-pointer select-none hover:text-gray-700 hover:underline"
+                                @click="modal_field_content.data.read_more = !modal_field_content.data.read_more">
+                                {{ modal_field_content.data.read_more ? 'less' : 'more' }}
+                            </span>
                         </p>
+                        
                         <template v-if="modal_field_content.data.read_more">
                             <p class="text-sm text-gray-500 mt-1">
-                                Docassmble uses Mako as a templating system, to allow for including variables and code in content. More on how to use this at <a href="https://docassemble.org/docs/markup.html#mako">Docassemble</a>.
+                                Docassmble uses Mako as a templating system, to allow for including variables and code in content. More on how to use this at <a href="https://docassemble.org/docs/markup.html#mako" target="_blank">Docassemble</a>.
                             </p>
                             <p class="text-sm text-gray-500 mt-1">
                                 Note that when referencing a variable, even in an 'if' statement, the block corresponding to the variable will be first shown to the user (regardless of the order specified in the graph).
-                                To show a variable only when it is defined, one can use the <span class="code text-gray-700">defined('variable')</span> function within Mako, as described at <a href="https://docassemble.org/docs/markup.html#mako">Docassemble</a>.
+                                To show a variable only when it is defined, one can use the <span class="code text-gray-700">defined('variable')</span> function within Mako, as described at <a href="https://docassemble.org/docs/markup.html#mako" target="_blank">Docassemble</a>.
                             </p>
                         </template>
                     </div>
                     <div class="mt-4">
                         <EasymdeView
                             :options="{}"
-                            v-model="modal_field_content_editor"
+                            :value="modal_field_content_editor"
+                            @input="e => modal_field_content_editor = e"
                             ></EasymdeView>
                     </div>
                 </div>
@@ -43,10 +47,14 @@
         </ModalComponent>
 
         <div class="">
-            <span class="m-2 font-bold block text-2xl border-b border-gray-300">{{ titleCase((cell.data as AntvNodeData).gd.type) }} node</span>
+            <!-- <span class="m-2 font-bold block text-xl border-b border-gray-300">{{ titleCase((cell.data as AntvNodeData).gd.type) }} node</span> -->
+            <span class="m-2 text-ellipsis overflow-hidden font-mono block text-xl border-b border-gray-300">{{
+                (cell.getData() as AntvNodeData).gd.variable ?? 
+                    `${ (cell.getData() as AntvNodeData).gd.type }_${cell.id.toString().substring(0, 8)}`
+                }}</span>
             
             <div class="p-2">
-                <button @click="cell?.remove()" class="action-btn-remove">Remove</button>
+                <button @click="cell?.remove()" class="btn btn-red">Remove</button>
             </div>
 
             <div v-for="(fields, field_group) in current_fields" :key="field_group">
@@ -60,7 +68,7 @@
                             <span class="text-gray-700 block mb-1 text-sm">Variable</span>
                             <div>
                                 <!-- <input class="w-full" type="text" :placeholder="cell.id" v-model="node_variable" /> -->
-                                <input class="style-soft w-full" type="text" v-model="node_variable" :placeholder="`${ (cell.getData() as AntvNodeData).gd.type }_${cell.id.toString().substring(0, 8)}`" />
+                                <input class="style-soft w-full font-mono" type="text" v-model="node_variable" :placeholder="`${ (cell.getData() as AntvNodeData).gd.type }_${cell.id.toString().substring(0, 8)}`" />
                             </div>
                         </label>
 
@@ -145,7 +153,7 @@
 
 <script lang="ts" setup>
 
-    import { computed, reactive, ref } from 'vue';
+    import { computed, ref } from 'vue';
     import { default_edge_label, node_types, node_type_default, AntvNodeData } from '@/utils/antv-model'
 
     import { Cell, Edge, Node } from '@antv/x6'
@@ -170,7 +178,6 @@
     }
 
     /* Computing current fields */
-
     const current_fields = computed(() => {
         const field = props.cell?.getData()?.node_type ?? node_type_default;
         let current_node_fields = null;
@@ -242,10 +249,6 @@
         }
     });
 
-    const editor_content_change = (editor: EasyMDE) => {
-        console.log("change event", editor.value())
-    }
-
 </script>
 
 <style lang="scss" scoped>
@@ -259,8 +262,10 @@ button.action-btn-remove {
     @apply hover:border-red-400  text-red-900 px-3 py-0.5 rounded;
 }
 
-p a {
-    @apply text-blue-600 hover:text-blue-500
+.modal-container {
+    p a {
+        @apply text-blue-600 hover:text-blue-500
+    }
 }
 
 </style>

@@ -140,4 +140,15 @@ button.btn {
     &:hover {
         @apply ring-4 ring-gray-200 border-gray-400 cursor-pointer ;
     }
+
+    &.btn-red {
+        @apply bg-red-600 border-0 text-white;
+        &:focus {
+            @apply outline-none ring-2 ring-offset-2 ring-red-500;
+        }
+        &:hover {
+            @apply bg-red-500;
+            @apply ring-0 cursor-pointer;
+        }
+    }
 }

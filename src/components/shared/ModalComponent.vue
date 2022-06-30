@@ -25,7 +25,7 @@
 import { Modal } from '@/utils/modal';
 
 const props = defineProps<{
-    modal: Modal
+    modal: Modal<object>
 }>();
 
 let down_target: Element | null = null;
