@@ -156,7 +156,19 @@ export class DocassembleTransformer implements ITransformer  {
         // return `${ node.type }_${ node.variable }`
         return node.gd.variable ?? `${ node.gd.type }_${node.id.toString().substring(0, 8)}`;
     }
+    
+    da_node_escaped_markdown(node: Node): string {
+        if (!node.gd.content)
+            return `'[content of node ${ node.id.substring(0, 8) }]'`;
 
+        const lines = node.gd.content.split(/\r?\n/);
+        const escaped = [];
+        for (const line of lines) {
+            escaped.push(`${line}`);
+        }
+        return "|\n".concat(indent(escaped).join("\n"));
+    }
+    
     /**
      * Construct python code block for docassemble, from given graph and node
      * Performs recursive preorder depth-first search
@@ -172,26 +184,15 @@ export class DocassembleTransformer implements ITransformer  {
 
         switch(node.gd.type) {
             case 'start': {
+                code.push(...[ this.da_node_get_id(node) ])
 
-                code.push(`def get_outcome_${ this.da_node_get_id(node) }():`)
-                code.push(...indent([ this.da_node_get_id(node) ]))
-                
-                const sub_cont: string[] = []
-                for(const node_edge_out of node_edges_out)
-                    sub_cont.push(...this.da_build_logic(graph, node_edge_out.get_node_to()))
-                
-                if (sub_cont.length > 0)
-                    code.push(...indent(sub_cont))
-                else
-                    code.push(...indent(['pass']));
-                
-                code.push(`outcome = get_outcome_${ this.da_node_get_id(node) }()`)
+                for(const node_edge_out of node_edges_out) 
+                    code.push(...this.da_build_logic(graph, node_edge_out.get_node_to()));
 
                 break
-
             }
             case 'end':
-                code.push(`return ${ this.da_node_get_id(node) }`);
+                code.push(`${ this.da_node_get_id(node) }`);
 
                 break
             case 'decision': {
@@ -241,12 +242,18 @@ export class DocassembleTransformer implements ITransformer  {
                 case 'start':
                     blocks.push([
                         'question: Start',
-                        `subquestion: '${ node.get_content() }'`,
+                        `subquestion: ${ this.da_node_escaped_markdown(node) }`,
                         `continue button field: ${ this.da_node_get_id(node) }`,
                     ]);
 
                     break
                 case 'end':
+                    blocks.push([
+                        `event: ${ this.da_node_get_id(node) }`,
+                        'question: End',
+                        `subquestion: ${ this.da_node_escaped_markdown(node) }`,
+                    ]);
+
                     break
                 case 'decision': {
                     
@@ -268,7 +275,7 @@ export class DocassembleTransformer implements ITransformer  {
 
                     blocks.push([
                         'question: Question',
-                        `subquestion: '${ node.get_content() }'`,
+                        `subquestion: ${ this.da_node_escaped_markdown(node) }`,
                         `field: ${ this.da_node_get_id(node) }`,
                         ...buttons
                     ]);
@@ -278,7 +285,7 @@ export class DocassembleTransformer implements ITransformer  {
                 case 'notice': {
                     blocks.push([
                         'question: Notice',
-                        `subquestion: '${ node.get_content() }'`,
+                        `subquestion: ${ this.da_node_escaped_markdown(node) }`,
                         `continue button field: ${ this.da_node_get_id(node) }`,
                     ]);
 
@@ -288,20 +295,14 @@ export class DocassembleTransformer implements ITransformer  {
         }
         
         const logic_code: string[] = [];
-        for (const node_end of nodes_end ?? [])
-            // adding declarations to end nodes content
-            logic_code.push(...indent([`${this.da_node_get_id(node_end)} = '${node_end.get_content()}'`]))
-
         logic_code.push(...indent(this.da_build_logic(graph, node_start)));
 
-        if (logic_code.length > 0)
-            blocks.push(['code: |', ...logic_code])
-
-        blocks.push([
-            'mandatory: True',
-            'question: End',
-            'subquestion: ${outcome}'
-        ]);
+        if (logic_code.length > 0) {
+            blocks.push([
+                'mandatory: True',
+                'code: |', ...logic_code
+            ])
+        }
         
         let content = blocks.map((block) => {
             if (typeof block == "string")

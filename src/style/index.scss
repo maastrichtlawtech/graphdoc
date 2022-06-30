@@ -2,6 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
+span.code {
+    @apply font-mono bg-gray-200 px-0.5 text-xs;
+    padding-top: 0.1rem;
+    padding-left: 0.125rem;
+    padding-bottom: 0.1rem;
+    padding-right: 0.125rem;
+}
+
 $node_start_color: #03B54D;
 $node_decision_color: #6A7FDB;
 $node_notice_color: #9a969c;
@@ -10,6 +18,16 @@ $node_end_color: #DF5361;
 html {
     // to prevent 'jumping' of content when overflow occurs
     overflow-y: scroll;
+}
+
+textarea.style-soft {
+    @apply block shadow-sm focus:ring-blue-500 focus:border-blue-500;
+    @apply sm:text-sm border border-gray-300 rounded-md;
+}
+
+input[type="text"].style-soft {
+    @apply flex-1 block w-full rounded-none rounded-md sm:text-sm border-gray-300;
+    @apply focus:ring-blue-500 focus:border-blue-500;
 }
 
 .node {
@@ -121,5 +139,16 @@ button.btn {
 
     &:hover {
         @apply ring-4 ring-gray-200 border-gray-400 cursor-pointer ;
+    }
+
+    &.btn-red {
+        @apply bg-red-600 border-0 text-white;
+        &:focus {
+            @apply outline-none ring-2 ring-offset-2 ring-red-500;
+        }
+        &:hover {
+            @apply bg-red-500;
+            @apply ring-0 cursor-pointer;
+        }
     }
 }
