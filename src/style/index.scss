@@ -1,4 +1,11 @@
-@tailwind base;
+// There are problems with the specificity of the toastui-toolbar buttons and
+// tailwindcss's preflight button specification. The following is the only
+// current 'solution' to this.
+
+/* @tailwind base; */
+@import "~tailwindcss/lib/css/preflight.css";
+@import "~@toast-ui/editor/dist/toastui-editor.css";
+
 @tailwind components;
 @tailwind utilities;
 
