@@ -12,15 +12,26 @@
         <ModalComponent :modal="modal_field_content" v-if="modal_field_content.is_open">
             <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                 <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                    <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">Deactivate account</h3>
+                    <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">Edit content</h3>
                     <div class="mt-2">
-                        <p class="text-sm text-gray-500">Are you sure you want to deactivate your account? All of your data will be permanently removed. This action cannot be undone.</p>
+                        <p class="text-sm text-gray-500">
+                            You can use <a href="https://commonmark.org/help/">markdown</a> to add styles to the content displayed for this node. 
+                            Text containing HTML code will be rendered as HTML.
+                        </p>
+                        <template v-if="modal_field_content.data.read_more">
+                            <p class="text-sm text-gray-500 mt-1">
+                                Docassmble uses Mako as a templating system, to allow for including variables and code in content. More on how to use this at <a href="https://docassemble.org/docs/markup.html#mako">Docassemble</a>.
+                            </p>
+                            <p class="text-sm text-gray-500 mt-1">
+                                Note that when referencing a variable, even in an 'if' statement, the block corresponding to the variable will be first shown to the user (regardless of the order specified in the graph).
+                                To show a variable only when it is defined, one can use the <span class="code text-gray-700">defined('variable')</span> function within Mako, as described at <a href="https://docassemble.org/docs/markup.html#mako">Docassemble</a>.
+                            </p>
+                        </template>
                     </div>
                     <div class="mt-4">
                         <EasymdeView
                             :options="{}"
-                            :value="modal_field_content_editor"
-                            @input="e => modal_field_content_editor = e"
+                            v-model="modal_field_content_editor"
                             ></EasymdeView>
                     </div>
                 </div>
@@ -143,7 +154,6 @@
     import { Modal } from '@/utils/modal';
     import ModalComponent from '@/components/shared/ModalComponent.vue';
 
-    // import TUIEditor from '@/components/shared/tui-editor-vue/TUIEditor.vue'
     import EasymdeView from '@/components/shared/easymde'
     import EasyMDE from 'easymde';
 
@@ -152,10 +162,9 @@
     }>();
     
     /* Modal definitions */
-    const modal_field_content = new Modal();
-    const modal_field_content_editor = ref('sdfdsfds');
+    const modal_field_content = new Modal({read_more: false});
+    const modal_field_content_editor = ref('');
     const modal_field_content_accept = () => {
-        console.log(node_content, modal_field_content_editor)
         node_content.value = modal_field_content_editor.value;
         modal_field_content.close();
     }
@@ -249,4 +258,9 @@ button.action-btn-remove {
     @apply font-normal bg-red-100 hover:bg-red-200 border border-red-200;
     @apply hover:border-red-400  text-red-900 px-3 py-0.5 rounded;
 }
+
+p a {
+    @apply text-blue-600 hover:text-blue-500
+}
+
 </style>

@@ -2,6 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
+span.code {
+    @apply font-mono bg-gray-200 px-0.5 text-xs;
+    padding-top: 0.1rem;
+    padding-left: 0.125rem;
+    padding-bottom: 0.1rem;
+    padding-right: 0.125rem;
+}
+
 $node_start_color: #03B54D;
 $node_decision_color: #6A7FDB;
 $node_notice_color: #9a969c;

@@ -1,12 +1,12 @@
-// export type Modal = {
-//     is_open: boolean,
-//     open: () => void,
-//     close: () => void
-// };
+import { reactive, ref } from "vue";
 
-import { ref } from "vue";
+export class Modal<DataT extends object> {
+    data;
+    
+    constructor(data: DataT) {
+        this.data = reactive(data);
+    }
 
-export class Modal {
     is_open = ref(false);
     open() {
         this.is_open.value = true;

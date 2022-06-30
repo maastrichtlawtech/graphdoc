@@ -52,3 +52,9 @@ onUnmounted(() => {
     }
 });
 </script>
+
+<style>
+.EasyMDEContainer {
+    text-align: initial;
+}
+</style>
