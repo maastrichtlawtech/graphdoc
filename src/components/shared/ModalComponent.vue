@@ -11,7 +11,8 @@
 
                 <div class="fixed z-20 inset-0 overflow-y-auto">
                     <div class="flex items-end sm:items-center justify-center min-h-full p-4 text-center">
-                        <div class="modal-container relative bg-white rounded-lg text-left overflow-hidden shadow-xl sm:my-8 sm:max-w-3xl sm:w-full">
+                        <div class="modal-container relative bg-white rounded-lg text-left overflow-hidden shadow-xl sm:my-8 sm:max-w-md sm:w-full" 
+                            :style="props.container_style ?? {}">
                             <slot></slot>
                         </div>
                     </div>
@@ -25,7 +26,8 @@
 import { Modal } from '@/utils/modal';
 
 const props = defineProps<{
-    modal: Modal<object>
+    modal: Modal<object>,
+    container_style?: object,
 }>();
 
 let down_target: Element | null = null;

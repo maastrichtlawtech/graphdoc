@@ -54,6 +54,11 @@ export class Node {
         // return this.gd.variable ?? this.gd.content ?? this.id.substring(0, 8);
         return this.gd.variable ?? this.gd.content ?? `${ this.gd.type }_${this.id.toString().substring(0, 8)}`;
     }
+
+    get_variable() {
+        // return this.gd.variable ?? this.gd.content ?? this.id.substring(0, 8);
+        return this.gd.variable ?? `${ this.gd.type }_${this.id.toString().substring(0, 8)}`;
+    }
  
     get_edges_in() {
         return this.graph.edges

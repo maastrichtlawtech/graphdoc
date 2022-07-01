@@ -4,9 +4,9 @@
         <span class="block p-2 text-gray-700">Select a node or edge to configure</span>
     </div>
 
-    <div v-else-if="cell.isNode()" class="w-full">
+    <div v-else-if="cell.isNode()" class="w-full p-3">
 
-        <ModalComponent :modal="modal_field_content" v-if="modal_field_content.is_open">
+        <ModalComponent :modal="modal_field_content" v-if="modal_field_content.is_open" :container_style="{'max-width': '48rem'}">
             <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                 <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
                     <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">Edit content</h3>
@@ -48,17 +48,21 @@
 
         <div class="">
             <!-- <span class="m-2 font-bold block text-xl border-b border-gray-300">{{ titleCase((cell.data as AntvNodeData).gd.type) }} node</span> -->
-            <span class="m-2 text-ellipsis overflow-hidden font-mono block text-xl border-b border-gray-300">{{
+            <span class="mb-2 text-ellipsis overflow-hidden font-mono block text-xl border-b border-gray-300">{{
                 (cell.getData() as AntvNodeData).gd.variable ?? 
                     `${ (cell.getData() as AntvNodeData).gd.type }_${cell.id.toString().substring(0, 8)}`
                 }}</span>
             
-            <div class="p-2">
-                <button @click="cell?.remove()" class="btn btn-red">Remove</button>
+            <div class="w-full">
+                <button @click="cell?.remove()" class="btn btn-red">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                </button>
             </div>
 
             <div v-for="(fields, field_group) in current_fields" :key="field_group">
-                <div class="p-2">
+                <div class="my-2">
                     <!-- <span class="my-2 block border-b border-gray-300 uppercase font-bold text-sm text-gray-800">{{ field_group }}</span> -->
                     <span class="mt-1 mb-3 block border-b border-gray-300 text-lg leading-6 font-medium text-gray-800">{{ field_group.toString()[0].toUpperCase().concat(field_group.toString().substring(1)) }}</span>
 
@@ -113,15 +117,19 @@
         
     </div>
 
-    <div v-else-if="cell.isEdge()" class="w-full">
+    <div v-else-if="cell.isEdge()" class="w-full p-2">
         <div class="">
-            <span class="m-2 font-bold block text-2xl border-b border-gray-300">Edge</span>
+            <span class="mb-2 font-bold block text-2xl border-b border-gray-300">Edge</span>
 
-            <div class="p-2">
-                <button @click="cell?.remove()" class="action-btn-remove">Remove</button>
+            <div>
+                <button @click="cell?.remove()" class="btn btn-red">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                </button>
             </div>
 
-            <div class="p-2" v-if="(cell.getSourceCell()?.getData() as AntvNodeData).gd.type == 'decision'">
+            <div class="my-2" v-if="(cell.getSourceCell()?.getData() as AntvNodeData).gd.type == 'decision'">
                 <span class="my-2 block border-b border-gray-300 uppercase font-bold text-sm text-gray-800">General</span>
 
                 <div class="block mt-2">
@@ -129,7 +137,7 @@
                         <span class="text-gray-700 block mb-1">Label</span>
                         <input
                             type="text"
-                            class="w-full"
+                            class="style-soft w-full"
                             v-model="edge_content" />
                     </label>
                     <div class="w-full my-2 text-right">
@@ -163,7 +171,6 @@
     import ModalComponent from '@/components/shared/ModalComponent.vue';
 
     import EasymdeView from '@/components/shared/easymde'
-    import EasyMDE from 'easymde';
 
     const props = defineProps<{
         cell: Cell | undefined
@@ -257,10 +264,10 @@ input {
     @apply border border-gray-200;
 }
 
-button.action-btn-remove {
-    @apply font-normal bg-red-100 hover:bg-red-200 border border-red-200;
-    @apply hover:border-red-400  text-red-900 px-3 py-0.5 rounded;
-}
+// button.action-btn-remove {
+//     @apply font-normal bg-red-100 hover:bg-red-200 border border-red-200;
+//     @apply hover:border-red-400  text-red-900 px-3 py-0.5 rounded;
+// }
 
 .modal-container {
     p a {

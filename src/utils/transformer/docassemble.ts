@@ -23,7 +23,7 @@ export class DocassembleTransformer implements ITransformer  {
         for (const node of graph.nodes) {
 
             // Add variables to list in this phase, to save iterations
-            const node_var = this.da_node_get_id(node);
+            const node_var = this.da_node_get_variable(node);
             if (node_var in variable_list) {
                 variable_list[node_var].amount += 1;
                 variable_list[node_var].nodes.push(node);
@@ -152,9 +152,10 @@ export class DocassembleTransformer implements ITransformer  {
         return errors;
     }
     
-    da_node_get_id(node: Node): string {
+    da_node_get_variable(node: Node): string {
         // return `${ node.type }_${ node.variable }`
-        return node.gd.variable ?? `${ node.gd.type }_${node.id.toString().substring(0, 8)}`;
+        // return node.gd.variable ?? `${ node.gd.type }_${node.id.toString().substring(0, 8)}`;
+        return node.get_variable();
     }
     
     da_node_escaped_markdown(node: Node): string {
@@ -184,7 +185,7 @@ export class DocassembleTransformer implements ITransformer  {
 
         switch(node.gd.type) {
             case 'start': {
-                code.push(...[ this.da_node_get_id(node) ])
+                code.push(...[ this.da_node_get_variable(node) ])
 
                 for(const node_edge_out of node_edges_out) 
                     code.push(...this.da_build_logic(graph, node_edge_out.get_node_to()));
@@ -192,7 +193,7 @@ export class DocassembleTransformer implements ITransformer  {
                 break
             }
             case 'end':
-                code.push(`${ this.da_node_get_id(node) }`);
+                code.push(`${ this.da_node_get_variable(node) }`);
 
                 break
             case 'decision': {
@@ -204,14 +205,14 @@ export class DocassembleTransformer implements ITransformer  {
 
                     const sub_node = this.da_build_logic(graph, node_edge_out.get_node_to())
 
-                    code.push(`if ${ this.da_node_get_id(node) } == '${ node_edge_out.gd.content }':`);
+                    code.push(`if ${ this.da_node_get_variable(node) } == '${ node_edge_out.gd.content }':`);
                     code.push(...indent(sub_node || ['pass'], 1))
                 }
                 
                 break
             }
             case 'notice': {
-                code.push(`${ this.da_node_get_id(node) }`);
+                code.push(`${ this.da_node_get_variable(node) }`);
 
                 for(const node_edge_out of node_edges_out) 
                     code.push(...this.da_build_logic(graph, node_edge_out.get_node_to()));
@@ -243,13 +244,13 @@ export class DocassembleTransformer implements ITransformer  {
                     blocks.push([
                         'question: Start',
                         `subquestion: ${ this.da_node_escaped_markdown(node) }`,
-                        `continue button field: ${ this.da_node_get_id(node) }`,
+                        `continue button field: ${ this.da_node_get_variable(node) }`,
                     ]);
 
                     break
                 case 'end':
                     blocks.push([
-                        `event: ${ this.da_node_get_id(node) }`,
+                        `event: ${ this.da_node_get_variable(node) }`,
                         'question: End',
                         `subquestion: ${ this.da_node_escaped_markdown(node) }`,
                     ]);
@@ -276,7 +277,7 @@ export class DocassembleTransformer implements ITransformer  {
                     blocks.push([
                         'question: Question',
                         `subquestion: ${ this.da_node_escaped_markdown(node) }`,
-                        `field: ${ this.da_node_get_id(node) }`,
+                        `field: ${ this.da_node_get_variable(node) }`,
                         ...buttons
                     ]);
 
@@ -286,7 +287,7 @@ export class DocassembleTransformer implements ITransformer  {
                     blocks.push([
                         'question: Notice',
                         `subquestion: ${ this.da_node_escaped_markdown(node) }`,
-                        `continue button field: ${ this.da_node_get_id(node) }`,
+                        `continue button field: ${ this.da_node_get_variable(node) }`,
                     ]);
 
                     break

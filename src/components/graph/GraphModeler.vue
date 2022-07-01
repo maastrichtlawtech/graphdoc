@@ -65,7 +65,14 @@
             <div class="w-full min-h-4 font-mono border rounded p-2 mt-1 whitespace-pre-wrap" id="docassemble_out_container">
                 {{ docassemble_cont }}
             </div>
-            <span class="copy-button" @click="copy_docassemble_out()">{{ copy_button_content }}</span>
+            <div class="actions">
+                <button @click="download_docassemble_out()" title="Download">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                </button>
+                <button @click="copy_docassemble_out()">{{ copy_button_content }}</button>
+            </div>
         </div>
     </div>
 
@@ -88,6 +95,8 @@
     import { graph_options_defaults, graph_register_defaults } from '@/utils/antv-model'
     import { DocassembleTransformer, validationErrorList } from '@/utils/transformer/docassemble';
     import { Node, Edge } from '@/utils/graph';
+
+    import { download } from '@/utils/data/download';
 
     const read_more = ref(false);
 
@@ -150,9 +159,9 @@
                                 select_cell(antv_node);
                             },
                             class: 'clickable-entity'
-                        }, error_node.get_label());
+                        }, error_node.get_variable());
                     } else {
-                        return `"${ error_node.get_label() }""`
+                        return `"${ error_node.get_variable() }""`
                     }
                 } else if (error_part.is_edge()) {
                     const error_edge = (error_part as Edge);
@@ -207,6 +216,9 @@
             setTimeout(() => { copy_button_content.value = 'COPY' }, 1200)
             console.log('Failed to copy', err);
         });
+    }
+    const download_docassemble_out = () => {
+        download("interview.yml", docassemble_cont.value)
     }
 
     const register_events = (graph: Graph) => {
@@ -294,11 +306,16 @@
     }
 }
 
-.copy-button {
-    @apply absolute top-0 right-0 m-2 px-2 py-0.5 rounded border bg-gray-100;
-    @apply text-sm uppercase font-bold text-gray-600 ;
-    &:hover {
-        @apply ring-2 ring-gray-200 border-gray-300 cursor-pointer 
+.actions {
+    @apply absolute top-0 right-0 m-2;
+    @apply inline-flex self-center;
+    
+    button {
+        @apply ml-2 px-2 py-0.5 rounded border bg-gray-100;
+        @apply text-sm uppercase font-bold text-gray-600 ;
+        &:hover {
+            @apply ring-2 ring-gray-200 border-gray-300 cursor-pointer 
+        }
     }
 }
 
