@@ -20,6 +20,13 @@ html {
     overflow-y: scroll;
 }
 
+a.styled {
+    @apply text-blue-600 underline;
+    &:hover {
+        @apply text-blue-700;
+    }
+}
+
 textarea.style-soft {
     @apply block shadow-sm focus:ring-blue-500 focus:border-blue-500;
     @apply sm:text-sm border border-gray-300 rounded-md;

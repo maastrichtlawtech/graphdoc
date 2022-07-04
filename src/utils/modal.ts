@@ -22,13 +22,13 @@ export class Modal<DataT extends object> {
 
     is_open = ref(false);
     open() {
+        this.is_open.value = true;
         if (this.events.onOpen)
             this.events.onOpen();
-        this.is_open.value = true;
     }
     close() {
+        this.is_open.value = false;
         if (this.events.onClose)
             this.events.onClose();
-        this.is_open.value = false;
     }
 }

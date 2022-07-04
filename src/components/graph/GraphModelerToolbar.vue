@@ -13,6 +13,7 @@
                 <p class="mt-2 text-sm text-gray-500">Paste the data of the exported interview below.</p>
                 <textarea
                     placeholder="Paste the contents of the interview here"
+                    ref="el_modal_import_text"
                     v-model="modal_import.data.text"
                     class="mt-2 w-full px-4 py-3 text-xs bg-gray-50 break-all font-mono resize-none h-20 leading-5 border border-gray-200 hover:shadow rounded-md">
                 </textarea>
@@ -54,7 +55,7 @@
         </div> -->
         
         <div class="toolbar-item">
-            <button class="bg-blue-200" :disabled="typeof graph === 'undefined'" @click="modal_import.open()">Import JSON</button>
+            <button class="bg-blue-200" :disabled="typeof graph === 'undefined'" @click="modal_import.open()">Import</button>
         </div>
         
         <div class="toolbar-item">
@@ -67,7 +68,7 @@
 <script lang="ts" setup>
     // https://github.com/antvis/X6/blob/master/sites/x6-sites-demos/packages/tutorial/basic/dnd/dnd/src/app.tsx
 
-    import { ref } from 'vue';
+    import { nextTick, Ref, ref } from 'vue';
     import { Addon, Graph } from '@antv/x6';
     import Transformer from '@/utils/transformer'
     import { JSONGraphData } from '@/utils/transformer/json';
@@ -79,7 +80,15 @@
     const toast = useToast();
 
     /* Modal definitions */
-    const modal_import: Modal<{text: string}> = new Modal({text: ''}, { onClose: () => modal_import.data.text = "" });
+    const el_modal_import_text: Ref<HTMLElement | null> = ref(null);
+    const modal_import: Modal<{text: string}> = new Modal({text: ''}, { 
+        onOpen: () => {
+            nextTick(() => {
+                el_modal_import_text.value?.focus()
+            })
+        },
+        onClose: () => modal_import.data.text = ""
+    });
     const modal_import_file_changed = (event: Event) => {
         var reader = new FileReader();
         reader.onload = (ev) => {
