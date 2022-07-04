@@ -12,24 +12,32 @@
             </a>
             <button @click="read_more = !read_more" class="font-normal underline-offset-4 underline hover:no-underline ml-4 py-1 px-2 text-gray-600 hover:text-gray-900">read {{ read_more ? 'less' : 'more' }}</button>
         </span>
-        <div v-if="read_more" class="text-sm">
+        <div v-if="read_more" class="text-sm text-slate-900">
             <p class="mt-2">
-                This tool serves as a PoC to convert flowcharts (which can be represented as directed acyclic graphs) to docassemble interviews. 
-                The goal of this tool is to provide an intuitive interface for constructing docassemble interviews, 
+                This tool serves as a PoC to convert flowcharts (which can be represented as directed acyclic graphs) to Docassemble interviews. 
+                The goal of this tool is to provide an intuitive interface for constructing Docassemble interviews, 
                 in which relations and dependencies between nodes ('blocks') are more clearly visible.
             </p>
             <h2 class="text-lg font-serif mt-2 mb-1">Instructions</h2>
-            <p>
+            <p class="mb-1">
                 Start by dragging nodes from the left sidebar.
                 Connect nodes by dragging edges from and to the ports of the nodes.
                 Configure nodes and edges by clicking on their cells and filling in the details in the config sidebar on the right. Nodes and edges can also be removed from this sidebar.
-                If no output is produced, interpret the validation errors presented above the docassemble output window.
-                For an example of a well structured graph, click on 'Load example'.
+                If no output is produced, interpret the validation errors presented above the Docassemble output window.
+            </p>
+            <p class="mb-1">
+                For an example of a well-structured graph in GraphDoc, click on 'Load example'.
+            </p>
+            <h2 class="text-lg font-serif mt-2 mb-1">Backup and publish</h2>
+            <p>
+                When your graph is complete, you can copy or download the contents of the Docassemble interview configuration file. 
+                These contents can be tested in the Docassemble Playground, by pasting the contents in the 
+                    <a class="styled" href="https://docassemble.org/docs/playground.html#interview_files" target="_blank">YAML editor</a>. 
+                By default, the bottom of the generated interview contains a backup of the constructed graph in JSON. You can import the graph 
+                by clicking on 'Import' in the toolbar and pasting or uploading the generated interview, or just appended JSON portion of the interview.
             </p>
         </div>
     </div>
-    <!-- <div class="border border-gray-400 rounded overflow-hidden"> -->
-    <!-- <div class="overflow-hidden rounded-lg ring-1 ring-slate-300"> -->
     <div class="overflow-hidden rounded-lg border border-slate-900/20 hover:shadow-sm hover:border-slate-900/30 transition ease-in-out">
         <div class="w-full bg-gray-100">
             <GraphModelerToolbar
@@ -43,9 +51,6 @@
                 <GraphModelerElementsBar v-if="graph !== null" :graph="graph"></GraphModelerElementsBar>
             </div>
             <div id="modeler-container-box" class="flex flex-grow border-b-0 border-gray-300/90" style="border-width: 3px;">
-            <!-- <div id="modeler-container-box" class="flex  w-full h-full" > -->
-                <!-- <div id="modeler-container" class="relative h-full"></div> -->
-                <!-- <div id="modeler-container" class="relative h-full flex-grow border-4 border-b-0 border-gray-300" style="flex: 1"></div> -->
                 <div id="modeler-container" style="flex: 1"></div>
             </div>
             <div class="w-64 flex-initial bg-gray-100 border-t border-gray-200 overflow-y-auto">
@@ -66,12 +71,12 @@
                 {{ docassemble_cont }}
             </div>
             <div class="actions">
-                <button @click="download_docassemble_out()" title="Download">
+                <button @click="download_docassemble_out()" title="Download YAML file" :disabled="formatted_validation_errors.length > 0">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                     </svg>
                 </button>
-                <button @click="copy_docassemble_out()">{{ copy_button_content }}</button>
+                <button @click="copy_docassemble_out()" title="Copy YMAL content" :disabled="formatted_validation_errors.length > 0">{{ copy_button_content }}</button>
             </div>
         </div>
     </div>
@@ -126,7 +131,7 @@
     });
 
     watch(() => docassemble_out_options, (val => {
-        console.log("options updated")
+        // console.log("options updated")
         docassemble_cont_update();
     }), { deep: true })
 
@@ -312,8 +317,13 @@
     
     button {
         @apply ml-2 px-2 py-0.5 rounded border bg-gray-100;
-        @apply text-sm uppercase font-bold text-gray-600 ;
-        &:hover {
+        @apply text-sm uppercase font-bold text-gray-600;
+
+        &:disabled {
+            @apply cursor-not-allowed bg-gray-200;
+        }
+
+        &:not([disabled]):hover {
             @apply ring-2 ring-gray-200 border-gray-300 cursor-pointer 
         }
     }

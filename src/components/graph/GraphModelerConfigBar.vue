@@ -8,7 +8,7 @@
 
         <ModalComponent :modal="modal_field_content" v-if="modal_field_content.is_open" :container_style="{'max-width': '48rem'}">
             <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                <div class="mt-3 text-center sm:mt-0 sm:text-left">
                     <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">Edit content</h3>
                     <div class="mt-2">
                         <p class="text-sm text-gray-500">
@@ -34,14 +34,14 @@
                     <div class="mt-4">
                         <EasymdeView
                             :options="{}"
-                            :value="modal_field_content_editor"
-                            @input="e => modal_field_content_editor = e"
+                            :value="modal_field_content.data.editor"
+                            @input="e => modal_field_content.data.editor = e"
                             ></EasymdeView>
                     </div>
                 </div>
             </div>
             <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                <button @click="modal_field_content_accept" type="button" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm">Accept</button>
+                <button @click="modal_field_content_accept(modal_field_content)" type="button" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm">Accept</button>
                 <button @click="modal_field_content.close()" type="button" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">Cancel</button>
             </div>       
         </ModalComponent>
@@ -80,7 +80,7 @@
                             <div class="flex justify-between items-center mb-1">
                                 <label class="text-gray-700 block text-sm" for="textarea_content">Content</label>
                                 <button
-                                    class="btn text-sm" @click="modal_field_content_editor = node_content; modal_field_content.open()">
+                                    class="btn text-sm" @click="modal_field_content.open()">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
                                     </svg>
@@ -177,11 +177,15 @@
     }>();
     
     /* Modal definitions */
-    const modal_field_content = new Modal({read_more: false});
-    const modal_field_content_editor = ref('');
-    const modal_field_content_accept = () => {
-        node_content.value = modal_field_content_editor.value;
-        modal_field_content.close();
+    // const modal_field_content_editor = ref('');
+    const modal_field_content = new Modal({read_more: false, editor: ''}, {
+        onOpen: () => {
+            modal_field_content.data.editor = node_content.value;
+        }
+    });
+    const modal_field_content_accept = (modal: typeof modal_field_content) => {
+        node_content.value = modal.data.editor;
+        modal.close();
     }
 
     /* Computing current fields */

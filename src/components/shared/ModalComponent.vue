@@ -4,6 +4,8 @@
             <!-- from: https://tailwindui.com/components/application-ui/overlays/modals -->
             <div class="relative z-10" aria-labelledby="modal-title" role="dialog" aria-modal="true"
                 v-if="props.modal.is_open.value"
+                @keydown.esc="props.modal.close()"
+                tabindex="0"
                 @mousedown="mousedown"
                 @mouseup="mouseup"
             >
