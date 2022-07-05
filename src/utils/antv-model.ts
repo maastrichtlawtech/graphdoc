@@ -1,5 +1,4 @@
-
-import { Cell, Graph, Node as AntvNode, Path } from '@antv/x6';
+import { Graph, Node as AntvNode, Path } from '@antv/x6';
 import { Options } from '@antv/x6/lib/graph/options';
 
 import { Node, NodeDefault } from './graph';
@@ -230,6 +229,13 @@ export function default_node_ports(ports: Array<keyof typeof default_port_groups
     return default_ports
 }
 
+export type AntvNodeData = {
+    errors?: boolean,
+    is_stencil_node?: boolean,
+
+    gd: Node['gd'],
+}
+
 export type node_types = {
     [
         key in "start" | "notice" | "decision" | "end"
@@ -242,16 +248,6 @@ export type node_types = {
     }
 };
 export const node_type_default = 'notice';
-
-// export type AntvNodeData = Partial<Node> & Pick<Node, 'type' | 'options' | 'variable' | 'content'>;
-// export type AntvNodeData = Pick<Node, 'type' | 'options' | 'variable' | 'content'> 
-//     & { errors?: boolean };
-export type AntvNodeData = {
-    errors?: boolean,
-    is_stencil_node?: boolean,
-
-    gd: Node['gd'],
-}
 
 const node_html = {
     render(node: AntvNode) {

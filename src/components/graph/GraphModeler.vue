@@ -160,7 +160,7 @@
                     if (typeof antv_node !== 'undefined') {
                         antv_node.setData({errors: true}, {no_da_update: true});
                         return h('span', {
-                            onClick(event: any) {
+                            onClick() {
                                 select_cell(antv_node);
                             },
                             class: 'clickable-entity'
@@ -176,7 +176,7 @@
                         `leaving from node ${ error_edge.get_node_from().get_label() }`;
                     if (typeof antv_edge !== 'undefined') {
                         return h('span', {
-                            onClick(event: any) {
+                            onClick() {
                                 select_cell(graph.value?.getCellById(error_edge.gd.content ? error_edge.id : error_edge.node_from_id));
                             },
                             class: 'clickable-entity'
@@ -206,21 +206,23 @@
     const copy_button_content = ref('COPY');
     const copy_docassemble_out = () => {
         
-        (window as any).getSelection().selectAllChildren(
-            document.getElementById('docassemble_out_container')
-        );
+        const el_docassemble_out_container = document.getElementById('docassemble_out_container');
+        if (el_docassemble_out_container)
+        {
+            (window as Window).getSelection()?.selectAllChildren(el_docassemble_out_container);
 
-        // source: https://stackoverflow.com/a/67008779/17864167
-        navigator.clipboard.writeText(docassemble_cont.value)
-        .then(() => {
-            copy_button_content.value = 'COPIED!';
-            setTimeout(() => { copy_button_content.value = 'COPY' }, 1200)
-        })
-        .catch(err => {
-            copy_button_content.value = 'FAILED';
-            setTimeout(() => { copy_button_content.value = 'COPY' }, 1200)
-            console.log('Failed to copy', err);
-        });
+            // source: https://stackoverflow.com/a/67008779/17864167
+            navigator.clipboard.writeText(docassemble_cont.value)
+            .then(() => {
+                copy_button_content.value = 'COPIED!';
+                setTimeout(() => { copy_button_content.value = 'COPY' }, 1200)
+            })
+            .catch(err => {
+                copy_button_content.value = 'FAILED';
+                setTimeout(() => { copy_button_content.value = 'COPY' }, 1200)
+                console.log('Failed to copy', err);
+            });
+        }
     }
     const download_docassemble_out = () => {
         download("interview.yml", docassemble_cont.value)
@@ -266,11 +268,11 @@
 
     const init_modeler = () => {
 
-        let container = document.getElementById('modeler-container')!;
+        const container = document.getElementById('modeler-container')!;
         // let container_box = document.getElementById('modeler-container-box')!;
 
-        let width = container.scrollWidth;
-        let height = container.scrollHeight || 500;
+        // const width = container.scrollWidth;
+        // const height = container.scrollHeight || 500;
 
         graph.value = new Graph({
             ...graph_options_defaults,
