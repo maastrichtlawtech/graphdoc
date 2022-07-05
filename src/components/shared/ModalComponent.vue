@@ -32,21 +32,25 @@ const props = defineProps<{
     container_style?: object,
 }>();
 
-let down_target: Element | null = null;
+// For closing on background click (i.e. mousedown AND mouseup outside of container)
+let down_out_container = false;
 
 const mousedown = (e: Event) => {
-    down_target = e.target as Element;
+    const down_target = e.target as Element;
+    const container = document.querySelector('.modal-container');
+    if (container != null && !container.contains(down_target as Element))
+        down_out_container = true;
+    else
+        down_out_container = false;
 }
 
 const mouseup = (e: Event) => {
-    if (down_target != null) {
+    if (down_out_container) {
+        const up_target = e.target as Element;
         const container = document.querySelector('.modal-container');
-        if (container != null && !container.contains(down_target as Element)) {
+        if (container != null && !container.contains(up_target as Element))
             props.modal.close();
-        }
     }
-
-    down_target = null;
 }
 </script>
 
