@@ -95,8 +95,9 @@
             if ((ev.target?.result ?? false) && typeof ev.target?.result === 'string')
                 modal_import.data.text = ev.target?.result;
         };
-        if ((event.target as HTMLInputElement).files != null) {
-            reader.readAsText((event.target as any).files[0]);
+        const event_target = event.target as HTMLInputElement;
+        if (event_target.files != null) {
+            reader.readAsText(event_target.files[0]);
         }
     }
     const modal_import_import = () => {
