@@ -15,38 +15,44 @@ User Interface | Docassemble
 -- | --
 ![ui](https://user-images.githubusercontent.com/50321538/174894290-6d5a6e41-4966-406d-9537-3bdf127eb63b.png) | ![docassemble output](https://user-images.githubusercontent.com/50321538/173640275-d485c7cb-06a4-4eae-93a6-0aa080d208a5.png)
 
-The interview constructed in the above screenshot results in the following Docassemble interview configuration file:
+The interview constructed in the above screenshot results in the following generated Docassemble interview configuration file:
 ```yaml
 question: Start
-subquestion: 'walk or bus?'
+subquestion: |
+  walk or bus?
 continue button field: walk_or_bus
 ---
 question: Question
-subquestion: 'is it raining?'
+subquestion: |
+  is it raining?
 field: is_raining
 buttons:
   - "No"
   - "Yes"
 ---
 question: Notice
-subquestion: 'take an umbrella'
+subquestion: |
+  take an umbrella
 continue button field: notice_take_umbrella
 ---
-code: |
-  bus = 'bus'
-  walk = 'walk'
-  def get_outcome_walk_or_bus():
-    walk_or_bus
-    if is_raining == 'Yes':
-      notice_take_umbrella
-      return bus
-    if is_raining == 'No':
-      return walk
-  outcome = get_outcome_walk_or_bus()
+event: end_bus
+question: End
+subquestion: |
+  take the bus
+---
+event: end_walk
+question: End
+subquestion: |
+  take a walk
 ---
 mandatory: True
-question: End
-subquestion: ${outcome}
+code: |
+  walk_or_bus
+  if is_raining == 'Yes':
+    notice_take_umbrella
+    end_bus
+  if is_raining == 'No':
+    end_walk
 ```
 
 
