@@ -101,3 +101,6 @@ npx http-server dist
 ```
 
 Alternatively, the index.html file in the dist folder (`dist/index.html`) can be opened using a webbrowser from the file explorer.
+
+## License
+See the LICENSE file for license rights and limitations (Apache 2.0).
