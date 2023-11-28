@@ -1,6 +1,6 @@
 {
   "name": "GraphDoc",
-  "version": "1.8.2",
+  "version": "1.9.0",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
@@ -15,6 +15,7 @@
   "devDependencies": {
     "@antv/x6": "^1.31.1",
     "@tailwindcss/forms": "^0.5.0",
+    "@types/node": "^20.10.0",
     "@types/uuid": "^8.3.4",
     "@typescript-eslint/eslint-plugin": "^5.4.0",
     "@typescript-eslint/parser": "^5.4.0",
