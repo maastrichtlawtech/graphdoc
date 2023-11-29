@@ -84,7 +84,8 @@
                 aaav-if="docassemble_out_options.include_url_export"
             >
                 <span class="text-gray-800 text-sm">Sharable URL to this graph:</span>
-                <input type="text" 
+                <input type="text"
+                    readonly
                     class="w-full min-h-4 text-sm font-mono border border-gray-200 text-gray-800 rounded p-2 mt-1"
                     @focus="($event.target as HTMLInputElement).select()"
                     :value="graph_sharable_url"
@@ -265,7 +266,7 @@
         if (formatted_validation_errors.value.length == 0) {
             const transformer = (new Transformer()).in_antv(graph.value);
             const encoded_interview = base64.encode(JSON.stringify(transformer.out_json()))
-            graph_sharable_url.value = `${window.location.href}#${encoded_interview}`
+            graph_sharable_url.value = `${window.location.href.split('#')[0]}#${encoded_interview}`
         } else {
             graph_sharable_url.value = '-';
         }
