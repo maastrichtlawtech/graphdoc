@@ -86,7 +86,7 @@
                 <span class="text-gray-800 text-sm">Sharable URL to this graph:</span>
                 <input type="text" 
                     class="w-full min-h-4 text-sm font-mono border border-gray-200 text-gray-800 rounded p-2 mt-1"
-                    @focus="$event.target.select()"
+                    @focus="($event.target as HTMLInputElement).select()"
                     :value="graph_sharable_url"
                 />
             </label>
@@ -151,7 +151,6 @@
     });
 
     watch(() => docassemble_out_options, (val => {
-        // console.log("options updated")
         docassemble_cont_update();
     }), { deep: true })
 
@@ -190,7 +189,7 @@
         
         const antv = (new Transformer()).in_json(import_json as JSONGraphData).out_antv();
 
-        graph.value.fromJSON(antv);
+        graph.value!.fromJSON(antv);
         docassemble_cont_update();
 
         toast.success("Successfully imported");
@@ -266,7 +265,7 @@
         if (formatted_validation_errors.value.length == 0) {
             const transformer = (new Transformer()).in_antv(graph.value);
             const encoded_interview = base64.encode(JSON.stringify(transformer.out_json()))
-            graph_sharable_url.value = `${window.location.protocol}//${window.location.host}/#${encoded_interview}`
+            graph_sharable_url.value = `${window.location.href}#${encoded_interview}`
         } else {
             graph_sharable_url.value = '-';
         }
