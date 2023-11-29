@@ -78,6 +78,18 @@
                 </button>
                 <button @click="copy_docassemble_out()" title="Copy YMAL content" :disabled="formatted_validation_errors.length > 0">{{ copy_button_content }}</button>
             </div>
+
+            <label
+                class="block mt-4 mb-2"
+                aaav-if="docassemble_out_options.include_url_export"
+            >
+                <span class="text-gray-800 text-sm">Sharable URL to this graph:</span>
+                <input type="text" 
+                    class="w-full min-h-4 text-sm font-mono border border-gray-200 text-gray-800 rounded p-2 mt-1"
+                    @focus="$event.target.select()"
+                    :value="graph_sharable_url"
+                />
+            </label>
         </div>
     </div>
 
@@ -85,7 +97,7 @@
 
 <script lang="ts" setup>
 
-    import { h, onMounted, reactive, Ref, ref, VNode, watch } from 'vue';
+    import { h, onMounted, reactive, nextTick, Ref, ref, VNode, watch } from 'vue';
 
     import { useToast } from "vue-toastification";
     
@@ -102,13 +114,18 @@
     import { Node, Edge } from '@/utils/graph';
 
     import { download } from '@/utils/data/download';
+    import base64 from '@/utils/data/base64';
+    import { JSONGraphData } from '@/utils/transformer/json';
 
     const read_more = ref(false);
+    const toast = useToast();
 
     onMounted(() => {
         init_modeler()
         docassemble_cont_update()
-    })
+        
+        nextTick(() => load_graph_from_url());
+    });
 
     const graph_data: Ref<object> = ref({});
     const graph: Ref<Graph | undefined> = ref();
@@ -126,14 +143,58 @@
     const formatted_validation_errors: Ref<(string | VNode)[][]> = ref([]);
     const docassemble_cont: Ref<string> = ref('');
 
+    const graph_sharable_url: Ref<string> = ref("");
+
     const docassemble_out_options = reactive({
         include_json_export: true,
+        include_url_export: false
     });
 
     watch(() => docassemble_out_options, (val => {
         // console.log("options updated")
         docassemble_cont_update();
     }), { deep: true })
+
+    const load_graph_from_url = () => {
+        if (location.hash.length === 0)
+            return;
+
+        const import_b64 = location.hash.substring(1);
+        let import_json_str = "";
+        try {
+            import_json_str = base64.decode(import_b64);
+        } catch {
+            toast.error("Base64-encoded graph in URL couldn't be decoded.")
+            console.log(import_b64);
+            return;
+        }
+        
+        let import_json: object = {};
+        try {
+            if (!import_json_str.length) throw Error();
+            import_json = JSON.parse(import_json_str);
+            if (!import_json) throw Error(); // to trigger same exception
+        } catch (e) {
+            toast.error("Data does not contain valid JSON, or does not contain the GraphDoc boundary specifier.")
+            // modal_import.data.error = "Data does not contain valid JSON, or does not contain the GraphDoc boundary specifier."
+            return;
+        }
+
+        if (!Object.hasOwnProperty.call(import_json, "main") || 
+            !Object.hasOwnProperty.call(import_json, "nodes") || 
+            !Object.hasOwnProperty.call(import_json, "edges")) {
+            toast.error("Data does not include one of the required properties: 'main', 'nodes' or 'edges'.");
+            // modal_import.data.error = "Data does not include one of the required properties: 'main', 'nodes' or 'edges'."
+            return;
+        }
+        
+        const antv = (new Transformer()).in_json(import_json as JSONGraphData).out_antv();
+
+        graph.value.fromJSON(antv);
+        docassemble_cont_update();
+
+        toast.success("Successfully imported");
+    }
 
     const docassemble_cont_update = () => {
         if (typeof graph.value == "undefined")
@@ -201,6 +262,15 @@
         } else {
             docassemble_cont.value = '-';
         }
+
+        if (formatted_validation_errors.value.length == 0) {
+            const transformer = (new Transformer()).in_antv(graph.value);
+            const encoded_interview = base64.encode(JSON.stringify(transformer.out_json()))
+            graph_sharable_url.value = `${window.location.protocol}//${window.location.host}/#${encoded_interview}`
+        } else {
+            graph_sharable_url.value = '-';
+        }
+
     };
 
     const copy_button_content = ref('COPY');
